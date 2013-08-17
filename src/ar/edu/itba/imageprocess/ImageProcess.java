@@ -1,15 +1,15 @@
 package ar.edu.itba.imageprocess;
 
-import javax.swing.JFrame;
+import java.awt.Dimension;
 
 public class ImageProcess {
 
 	public static final String APPLICATION_NAME = "ImageProcess";
 	public static final String IMG_PATH = "res/img/";
+	public static final Dimension IMG_DIMENSION = new Dimension(512, 350);
 
 	public static void main(String[] args) {
-		MainFrame frame = new MainFrame();
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		MainController controller = new MainController();
+		controller.start();
 	}
 }

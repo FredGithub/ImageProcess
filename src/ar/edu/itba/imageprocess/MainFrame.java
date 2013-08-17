@@ -13,21 +13,21 @@ import javax.swing.border.EmptyBorder;
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
+	private MainController mController;
 	private JPanel mMainPanel;
+	private ImagePane mImagePane1;
+	private ImagePane mImagePane2;
 
-	public MainFrame() {
+	public MainFrame(MainController controller) {
 		super(ImageProcess.APPLICATION_NAME);
 
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setSize(new Dimension((int) (screenSize.width * 0.8), (int) (screenSize.width * 0.8 / 1.6)));
-		setResizable(false);
-		setLocationRelativeTo(null);
+		mController = controller;
 
 		mMainPanel = new JPanel(new GridBagLayout());
 		mMainPanel.setBorder(new EmptyBorder(16, 16, 16, 16));
 		GridBagConstraints c;
 
-		MenuPane menuPane = new MenuPane();
+		MenuPane menuPane = new MenuPane(controller);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -36,25 +36,36 @@ public class MainFrame extends JFrame {
 		c.insets = new Insets(0, 0, 16, 0);
 		mMainPanel.add(menuPane, c);
 
-		ImagePane pane1 = new ImagePane();
+		mImagePane1 = new ImagePane(controller, 0);
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 1;
+		c.gridwidth = 1;
 		c.insets = new Insets(0, 0, 0, 16);
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
-		mMainPanel.add(pane1, c);
+		mMainPanel.add(mImagePane1, c);
 
-		ImagePane pane2 = new ImagePane();
+		mImagePane2 = new ImagePane(controller, 1);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
+		c.gridwidth = 1;
 		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1;
 		c.weighty = 1;
-		mMainPanel.add(pane2, c);
+		mMainPanel.add(mImagePane2, c);
 
 		getContentPane().add(mMainPanel);
+		pack();
+		setResizable(false);
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		setLocation(screenSize.width / 2 - getSize().width / 2, 20);
+	}
+
+	public void start() {
+		mController.selectImagePane(mImagePane1);
+		setVisible(true);
 	}
 }

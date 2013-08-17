@@ -6,6 +6,7 @@ import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,6 +43,20 @@ public class ExtImageIO {
 		int[] imgData = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 		System.arraycopy(fileData, 0, imgData, 0, fileData.length);
 		return image;
+	}
+
+	public static void write(BufferedImage image, File file) throws IOException {
+		// write the image data to a file
+		String extension = FileUtils.getFileExtension(file);
+		FileOutputStream out = new FileOutputStream(file);
+		if (extension.equals("raw")) {
+			out.write(((DataBufferByte) image.getData().getDataBuffer()).getData());
+		} else if (extension.equals("pgm")) {
+			// TODO
+		} else if (extension.equals("ppm")) {
+			// TODO
+		}
+		out.close();
 	}
 
 	private static PixmapData extractPixmapData(File file) throws IOException {
