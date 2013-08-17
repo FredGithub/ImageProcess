@@ -6,11 +6,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class FileUtils {
-	
+
 	public static String getFileExtension(File file) {
 		return file.getName().substring(file.getName().lastIndexOf(".") + 1).toLowerCase();
 	}
-	
+
 	public static byte[] readFileBytes(File file) {
 		FileInputStream is = null;
 		ByteArrayOutputStream ous = null;
