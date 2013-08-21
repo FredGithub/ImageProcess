@@ -31,6 +31,12 @@ public class MainController {
 		mMainFrame.start();
 	}
 
+	public void repaintMainFrame() {
+		if (mMainFrame != null) {
+			mMainFrame.repaint();
+		}
+	}
+
 	public void selectImagePane(ImagePane imagePane) {
 		if (imagePane != null) {
 			Log.d("selecting image pane " + imagePane.getIndex());
@@ -39,7 +45,7 @@ public class MainController {
 			}
 			mImagePaneSource = imagePane;
 			mImagePaneSource.setSource(true);
-			mMainFrame.repaint();
+			repaintMainFrame();
 		}
 	}
 
@@ -47,7 +53,7 @@ public class MainController {
 		if (mImagePaneSource != null) {
 			Log.d("opening " + file.getName());
 			mImagePaneSource.loadImage(file, width, height);
-			mMainFrame.repaint();
+			repaintMainFrame();
 		}
 	}
 
@@ -77,7 +83,7 @@ public class MainController {
 			Graphics2D g2d = image.createGraphics();
 			g2d.setColor(Color.WHITE);
 			g2d.fill(new Ellipse2D.Double(imageSize / 2 - radius / 2, imageSize / 2 - radius / 2, radius, radius));
-			mImagePaneSource.setImage(image);
+			mImagePaneSource.setImageWithHistory(image);
 		}
 	}
 
@@ -89,7 +95,7 @@ public class MainController {
 			Graphics2D g2d = image.createGraphics();
 			g2d.setColor(Color.WHITE);
 			g2d.fill(new Rectangle2D.Double(imageSize / 2 - size / 2, imageSize / 2 - size / 2, size, size));
-			mImagePaneSource.setImage(image);
+			mImagePaneSource.setImageWithHistory(image);
 		}
 	}
 
@@ -100,7 +106,7 @@ public class MainController {
 			Graphics2D g2d = image.createGraphics();
 			g2d.setPaint(new GradientPaint(0, 0, Color.GRAY, imageSize, 0, Color.WHITE));
 			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
-			mImagePaneSource.setImage(image);
+			mImagePaneSource.setImageWithHistory(image);
 		}
 	}
 
@@ -111,7 +117,7 @@ public class MainController {
 			Graphics2D g2d = image.createGraphics();
 			g2d.setPaint(new GradientPaint(0, 0, Color.BLUE, imageSize, 0, Color.WHITE));
 			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
-			mImagePaneSource.setImage(image);
+			mImagePaneSource.setImageWithHistory(image);
 		}
 	}
 }

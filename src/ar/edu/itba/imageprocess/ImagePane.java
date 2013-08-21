@@ -5,12 +5,15 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -24,7 +27,7 @@ import ar.edu.itba.imageprocess.utils.Log;
 import ar.edu.itba.imageprocess.utils.StringUtils;
 
 @SuppressWarnings("serial")
-public class ImagePane extends JPanel implements MouseListener, MouseMotionListener {
+public class ImagePane extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
 
 	public static final Color COLOR_UNSELECTED = new Color(0, 0, 0, 20);
 	public static final Color COLOR_SOURCE = new Color(0, 255, 0, 20);
@@ -32,6 +35,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	private MainController mController;
 	private int mIndex;
 	private BufferedImage mImage;
+	private ArrayList<BufferedImage> mHistory;
+	private int mHistoryIndex;
 	private JPanel mImagePane;
 	private JLabel mImageLabel;
 	private JButton mPrevBtn;
@@ -44,6 +49,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mController = controller;
 		mIndex = index;
 		mImage = null;
+		mHistory = new ArrayList<BufferedImage>();
+		mHistoryIndex = -1;
 		GridBagConstraints c;
 
 		mImagePane = new JPanel(new GridBagLayout());
@@ -64,6 +71,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mImagePane.add(mImageLabel);
 
 		mPrevBtn = new JButton("Prev");
+		mPrevBtn.addActionListener(this);
 		c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
@@ -73,6 +81,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		add(mPrevBtn, c);
 
 		mNextBtn = new JButton("Next");
+		mNextBtn.addActionListener(this);
 		c = new GridBagConstraints();
 		c.gridx = 1;
 		c.gridy = 1;
@@ -88,6 +97,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		c.insets = new Insets(8, 0, 0, 0);
 		c.anchor = GridBagConstraints.LINE_START;
 		add(mPixelLabel, c);
+
+		setImageWithHistory(null);
 	}
 
 	@Override
@@ -130,6 +141,15 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		}
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == mPrevBtn) {
+			historyMove(-1);
+		} else if (e.getSource() == mNextBtn) {
+			historyMove(+1);
+		}
+	}
+
 	public int getIndex() {
 		return mIndex;
 	}
@@ -150,6 +170,35 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mImage = image;
 		if (mImage != null) {
 			mImageLabel.setIcon(new ImageIcon(mImage));
+		} else {
+			mImageLabel.setIcon(null);
+		}
+		mController.repaintMainFrame();
+	}
+
+	public void setImageWithHistory(BufferedImage image) {
+		setImage(image);
+		while (mHistoryIndex < mHistory.size() - 1) {
+			mHistory.remove(mHistory.size() - 1);
+		}
+		mHistory.add(mImage);
+		mHistoryIndex++;
+		setHistoryButtonsState();
+	}
+
+	public void historyMove(int move) {
+		int futureIndex = mHistoryIndex + move;
+		if (futureIndex < 0) {
+			futureIndex = 0;
+		}
+		if (futureIndex > mHistory.size() - 1) {
+			futureIndex = mHistory.size() - 1;
+		}
+		if (futureIndex != mHistoryIndex) {
+			Log.d("history move (" + futureIndex + ")");
+			mHistoryIndex = futureIndex;
+			setImage(mHistory.get(mHistoryIndex));
+			setHistoryButtonsState();
 		}
 	}
 
@@ -167,7 +216,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 				image = ImageIO.read(file);
 			}
 			if (image != null) {
-				setImage(image);
+				setImageWithHistory(image);
 			} else {
 				Log.d("couldn't load image " + file.getName());
 			}
@@ -176,5 +225,10 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		} catch (Exception e) {
 			Log.d("unknown error! " + e);
 		}
+	}
+
+	private void setHistoryButtonsState() {
+		mPrevBtn.setEnabled(mHistoryIndex > 0);
+		mNextBtn.setEnabled(mHistoryIndex < mHistory.size() - 1);
 	}
 }
