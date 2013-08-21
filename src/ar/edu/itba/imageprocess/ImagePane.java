@@ -41,6 +41,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	private JLabel mImageLabel;
 	private JButton mPrevBtn;
 	private JButton mNextBtn;
+	private JButton mClearBtn;
 	private JLabel mPixelLabel;
 
 	public ImagePane(MainController controller, int index) {
@@ -89,13 +90,22 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
 		add(mNextBtn, c);
 
-		mPixelLabel = new JLabel("---");
-		mPixelLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		mClearBtn = new JButton("Clear");
+		mClearBtn.addActionListener(this);
 		c = new GridBagConstraints();
 		c.gridx = 2;
 		c.gridy = 1;
+		c.insets = new Insets(8, 0, 0, 8);
+		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		add(mClearBtn, c);
+
+		mPixelLabel = new JLabel("R=0 G=0 B=0");
+		mPixelLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		c = new GridBagConstraints();
+		c.gridx = 3;
+		c.gridy = 1;
 		c.insets = new Insets(8, 0, 0, 0);
-		c.anchor = GridBagConstraints.LINE_START;
+		c.anchor = GridBagConstraints.LINE_END;
 		add(mPixelLabel, c);
 
 		setImageWithHistory(null);
@@ -147,6 +157,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 			historyMove(-1);
 		} else if (e.getSource() == mNextBtn) {
 			historyMove(+1);
+		} else if (e.getSource() == mClearBtn) {
+			setImageWithHistory(null);
 		}
 	}
 
@@ -173,6 +185,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		} else {
 			mImageLabel.setIcon(null);
 		}
+		mClearBtn.setEnabled(mImage != null);
 		mController.repaintMainFrame();
 	}
 
