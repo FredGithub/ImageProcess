@@ -20,26 +20,28 @@ public class MainController {
 
 	private MainFrame mMainFrame;
 	private ImagePane mImagePaneSource;
+	private ImagePane mImagePaneDest;
 
 	public MainController() {
 		mMainFrame = new MainFrame(this);
 		mMainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mImagePaneSource = null;
+		mImagePaneDest = null;
 	}
 
 	public void start() {
 		mMainFrame.start();
 	}
-
+	
 	public void repaintMainFrame() {
 		if (mMainFrame != null) {
 			mMainFrame.repaint();
 		}
 	}
 
-	public void selectImagePane(ImagePane imagePane) {
-		if (imagePane != null) {
-			Log.d("selecting image pane " + imagePane.getIndex());
+	public void selectSourceImagePane(ImagePane imagePane) {
+		if (imagePane != null && imagePane != mImagePaneSource) {
+			Log.d("selecting source image pane " + imagePane.getIndex());
 			if (mImagePaneSource != null) {
 				mImagePaneSource.setSource(false);
 			}
@@ -49,10 +51,22 @@ public class MainController {
 		}
 	}
 
+	public void selectDestImagePane(ImagePane imagePane) {
+		if (imagePane != null && imagePane != mImagePaneDest) {
+			Log.d("selecting dest image pane " + imagePane.getIndex());
+			if (mImagePaneDest != null) {
+				mImagePaneDest.setDest(false);
+			}
+			mImagePaneDest = imagePane;
+			mImagePaneDest.setDest(true);
+			repaintMainFrame();
+		}
+	}
+
 	public void loadImage(File file, int width, int height) {
-		if (mImagePaneSource != null) {
+		if (mImagePaneDest != null) {
 			Log.d("opening " + file.getName());
-			mImagePaneSource.loadImage(file, width, height);
+			mImagePaneDest.loadImage(file, width, height);
 			repaintMainFrame();
 		}
 	}
@@ -76,48 +90,48 @@ public class MainController {
 	}
 
 	public void generateCircle() {
-		if (mImagePaneSource != null) {
+		if (mImagePaneDest != null) {
 			int imageSize = 256;
 			int radius = 92;
 			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
 			Graphics2D g2d = image.createGraphics();
 			g2d.setColor(Color.WHITE);
 			g2d.fill(new Ellipse2D.Double(imageSize / 2 - radius / 2, imageSize / 2 - radius / 2, radius, radius));
-			mImagePaneSource.setImageWithHistory(image);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateSquare() {
-		if (mImagePaneSource != null) {
+		if (mImagePaneDest != null) {
 			int imageSize = 256;
 			int size = 92;
 			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
 			Graphics2D g2d = image.createGraphics();
 			g2d.setColor(Color.WHITE);
 			g2d.fill(new Rectangle2D.Double(imageSize / 2 - size / 2, imageSize / 2 - size / 2, size, size));
-			mImagePaneSource.setImageWithHistory(image);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateGradient() {
-		if (mImagePaneSource != null) {
+		if (mImagePaneDest != null) {
 			int imageSize = 256;
 			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
 			Graphics2D g2d = image.createGraphics();
 			g2d.setPaint(new GradientPaint(0, 0, Color.GRAY, imageSize, 0, Color.WHITE));
 			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
-			mImagePaneSource.setImageWithHistory(image);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateColorGradient() {
-		if (mImagePaneSource != null) {
+		if (mImagePaneDest != null) {
 			int imageSize = 256;
 			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2d = image.createGraphics();
 			g2d.setPaint(new GradientPaint(0, 0, Color.BLUE, imageSize, 0, Color.WHITE));
 			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
-			mImagePaneSource.setImageWithHistory(image);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 }

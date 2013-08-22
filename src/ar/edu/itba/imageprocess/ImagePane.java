@@ -30,13 +30,16 @@ import ar.edu.itba.imageprocess.utils.StringUtils;
 public class ImagePane extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
 
 	public static final Color COLOR_UNSELECTED = new Color(0, 0, 0, 20);
-	public static final Color COLOR_SOURCE = new Color(0, 255, 0, 20);
+	public static final Color COLOR_SOURCE = new Color(0, 255, 0, 30);
+	public static final Color COLOR_DEST = new Color(0, 0, 255, 30);
 
 	private MainController mController;
 	private int mIndex;
 	private BufferedImage mImage;
 	private ArrayList<BufferedImage> mHistory;
 	private int mHistoryIndex;
+	private boolean mSource;
+	private boolean mDest;
 	private JPanel mImagePane;
 	private JLabel mImageLabel;
 	private JButton mPrevBtn;
@@ -52,6 +55,9 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mImage = null;
 		mHistory = new ArrayList<BufferedImage>();
 		mHistoryIndex = -1;
+		mSource = false;
+		mDest = false;
+
 		GridBagConstraints c;
 
 		mImagePane = new JPanel(new GridBagLayout());
@@ -130,7 +136,12 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		if (e.getSource() == mImagePane) {
-			mController.selectImagePane(this);
+			if (e.getButton() == MouseEvent.BUTTON1) {
+				mController.selectSourceImagePane(this);
+				mController.selectDestImagePane(this);
+			} else if (e.getButton() == MouseEvent.BUTTON3) {
+				mController.selectDestImagePane(this);
+			}
 		}
 	}
 
@@ -166,12 +177,22 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		return mIndex;
 	}
 
+	public boolean getSource() {
+		return mSource;
+	}
+
 	public void setSource(boolean source) {
-		if (source) {
-			mImagePane.setBackground(COLOR_SOURCE);
-		} else {
-			mImagePane.setBackground(COLOR_UNSELECTED);
-		}
+		mSource = source;
+		updateSelectionColor();
+	}
+
+	public boolean getDest() {
+		return mDest;
+	}
+
+	public void setDest(boolean dest) {
+		mDest = dest;
+		updateSelectionColor();
 	}
 
 	public BufferedImage getImage() {
@@ -243,5 +264,15 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	private void setHistoryButtonsState() {
 		mPrevBtn.setEnabled(mHistoryIndex > 0);
 		mNextBtn.setEnabled(mHistoryIndex < mHistory.size() - 1);
+	}
+
+	private void updateSelectionColor() {
+		if (mSource) {
+			mImagePane.setBackground(COLOR_SOURCE);
+		} else if (mDest) {
+			mImagePane.setBackground(COLOR_DEST);
+		} else {
+			mImagePane.setBackground(COLOR_UNSELECTED);
+		}
 	}
 }

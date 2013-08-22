@@ -65,7 +65,8 @@ public class MainFrame extends JFrame {
 	}
 
 	public void start() {
-		mController.selectImagePane(mImagePane1);
+		mController.selectSourceImagePane(mImagePane1);
+		mController.selectDestImagePane(mImagePane1);
 		setVisible(true);
 	}
 }
