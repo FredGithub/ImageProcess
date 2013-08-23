@@ -38,6 +38,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mGenerateSquareBtn;
 	private JButton mGenerateGradientBtn;
 	private JButton mGenerateColorGradientBtn;
+	private JButton mFilterNegative;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -95,6 +96,16 @@ public class MenuPane extends JPanel implements ActionListener {
 		mGenerateColorGradientBtn = new JButton("Color gradient");
 		mGenerateColorGradientBtn.addActionListener(this);
 		menu2.add(mGenerateColorGradientBtn);
+		
+		// file menu
+
+		JPanel menu3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Filter", menu3);
+		
+		mFilterNegative = new JButton("Negative");
+		mFilterNegative.addActionListener(this);
+		menu3.add(mFilterNegative);
+
 	}
 
 	@Override
@@ -111,6 +122,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateGradient();
 		} else if (e.getSource() == mGenerateColorGradientBtn) {
 			mController.generateColorGradient();
+		} else if (e.getSource() == mFilterNegative) {
+			mController.filterNegative();
 		}
 	}
 

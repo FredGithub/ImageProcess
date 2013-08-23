@@ -3,9 +3,14 @@ package ar.edu.itba.imageprocess;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.PaintContext;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.IOException;
 
@@ -132,6 +137,26 @@ public class MainController {
 			g2d.setPaint(new GradientPaint(0, 0, Color.BLUE, imageSize, 0, Color.WHITE));
 			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
 			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	/**
+	 * TP1-2
+	 * Creates a negative of the picture.
+	 */
+	public void filterNegative() {
+		if (mImagePaneDest != null) {
+			BufferedImage image = mImagePaneSource.getImage();
+			int width = image.getWidth();
+			int height = image.getHeight();
+			BufferedImage imageDest = new BufferedImage(width, height, image.getType());
+			
+			for (int i=0; i<image.getWidth(); i++) {
+				for (int j=0; j<image.getHeight(); j++) {
+					imageDest.setRGB(i, j, 16777215-image.getRGB(i, j)); //16777215 = 0xFFFFFF
+				}
+			}
+			mImagePaneDest.setImageWithHistory(imageDest);
 		}
 	}
 }
