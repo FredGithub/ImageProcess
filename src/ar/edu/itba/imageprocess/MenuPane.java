@@ -38,7 +38,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mGenerateSquareBtn;
 	private JButton mGenerateGradientBtn;
 	private JButton mGenerateColorGradientBtn;
+	
 	private JButton mFilterNegative;
+	private JButton mFilterThreshold;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -106,6 +108,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mFilterNegative.addActionListener(this);
 		menu3.add(mFilterNegative);
 
+		mFilterThreshold = new JButton("Threshold");
+		mFilterThreshold.addActionListener(this);
+		menu3.add(mFilterThreshold);
+
 	}
 
 	@Override
@@ -124,6 +130,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateColorGradient();
 		} else if (e.getSource() == mFilterNegative) {
 			mController.filterNegative();
+		} else if (e.getSource() == mFilterThreshold) {
+			mController.filterThreshold();
 		}
 	}
 

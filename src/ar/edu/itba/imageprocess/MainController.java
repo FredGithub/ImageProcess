@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Scrollbar;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -16,6 +17,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import ar.edu.itba.imageprocess.utils.ExtImageIO;
 import ar.edu.itba.imageprocess.utils.FileUtils;
@@ -142,7 +144,7 @@ public class MainController {
 
 	/**
 	 * TP1-2
-	 * Creates a negative of the picture.
+	 * Creates a negative of the image.
 	 */
 	public void filterNegative() {
 		if (mImagePaneDest != null) {
@@ -153,10 +155,39 @@ public class MainController {
 			
 			for (int i=0; i<image.getWidth(); i++) {
 				for (int j=0; j<image.getHeight(); j++) {
-					imageDest.setRGB(i, j, 16777215-image.getRGB(i, j)); //16777215 = 0xFFFFFF
+					imageDest.setRGB(i, j, 0xFFFFFF-image.getRGB(i, j));
 				}
 			}
 			mImagePaneDest.setImageWithHistory(imageDest);
 		}
+	}
+
+	/**
+	 * TP1-5
+	 * Creates a threshold version of the image.
+	 */
+	public void filterThreshold() {
+		if (mImagePaneDest != null) {
+			BufferedImage image = mImagePaneSource.getImage();
+			int width = image.getWidth();
+			int height = image.getHeight();
+			BufferedImage imageDest = new BufferedImage(width, height, image.getType());
+			
+			// TODO - Make sure that you can set the threshold yourself
+			int threshold = 0x888888;
+			for (int i=0; i<image.getWidth(); i++) {
+				for (int j=0; j<image.getHeight(); j++) {
+					// TODO - Why minus..? It works, but why minus?
+					int rgb = -image.getRGB(i, j);
+					if(rgb < threshold) {
+						imageDest.setRGB(i, j, 0x000000);
+					} else {
+						imageDest.setRGB(i, j, 0xFFFFFF);
+					}
+				}
+			}
+			
+			mImagePaneDest.setImageWithHistory(imageDest);
+		}		
 	}
 }
