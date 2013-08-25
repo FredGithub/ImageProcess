@@ -7,6 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ExtImageIO;
 import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.Log;
@@ -129,6 +130,14 @@ public class MainController {
 	public void generateColorGradient() {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateColorGradient(256);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void displayHistogram() {
+		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			int[] values = ArrayUtils.intArray2Dto1D(mImagePaneSource.getImage().getGrayChannel());
+			Image image = Filters.generateHistogramImage(values);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}

@@ -32,12 +32,21 @@ public class MenuPane extends JPanel implements ActionListener {
 	private MainController mController;
 	private JFileChooser mFileChooser;
 	private HashMap<String, int[]> mDefaultDimensions;
+
+	// file menu
 	private JButton mLoadBtn;
 	private JButton mSaveBtn;
+
+	// share generation menu
 	private JButton mGenerateCircleBtn;
 	private JButton mGenerateSquareBtn;
 	private JButton mGenerateGradientBtn;
 	private JButton mGenerateColorGradientBtn;
+
+	// histogram menu
+	private JButton mHistogramBtn;
+
+	// noise and blur menu
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -64,37 +73,51 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		// file menu
 
-		JPanel menu1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("File", menu1);
+		JPanel menuFile = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("File", menuFile);
 
 		mLoadBtn = new JButton("Load");
 		mLoadBtn.addActionListener(this);
-		menu1.add(mLoadBtn);
+		menuFile.add(mLoadBtn);
 
 		mSaveBtn = new JButton("Save");
 		mSaveBtn.addActionListener(this);
-		menu1.add(mSaveBtn);
+		menuFile.add(mSaveBtn);
 
 		// share generation menu
 
-		JPanel menu2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Shape generation", menu2);
+		JPanel menuShape = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Shape generation", menuShape);
 
 		mGenerateCircleBtn = new JButton("Circle");
 		mGenerateCircleBtn.addActionListener(this);
-		menu2.add(mGenerateCircleBtn);
+		menuShape.add(mGenerateCircleBtn);
 
 		mGenerateSquareBtn = new JButton("Square");
 		mGenerateSquareBtn.addActionListener(this);
-		menu2.add(mGenerateSquareBtn);
+		menuShape.add(mGenerateSquareBtn);
 
 		mGenerateGradientBtn = new JButton("Gradient");
 		mGenerateGradientBtn.addActionListener(this);
-		menu2.add(mGenerateGradientBtn);
+		menuShape.add(mGenerateGradientBtn);
 
 		mGenerateColorGradientBtn = new JButton("Color gradient");
 		mGenerateColorGradientBtn.addActionListener(this);
-		menu2.add(mGenerateColorGradientBtn);
+		menuShape.add(mGenerateColorGradientBtn);
+
+		// histogram menu
+
+		JPanel menuHistogram = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Histogram", menuHistogram);
+
+		mHistogramBtn = new JButton("Histogram");
+		mHistogramBtn.addActionListener(this);
+		menuHistogram.add(mHistogramBtn);
+
+		// noise and blur menu
+
+		JPanel menuNoise = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Noise and blur", menuNoise);
 	}
 
 	@Override
@@ -111,6 +134,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateGradient();
 		} else if (e.getSource() == mGenerateColorGradientBtn) {
 			mController.generateColorGradient();
+		} else if (e.getSource() == mHistogramBtn) {
+			mController.displayHistogram();
 		}
 	}
 

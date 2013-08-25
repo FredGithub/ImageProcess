@@ -7,6 +7,13 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.statistics.HistogramDataset;
+
+import ar.edu.itba.imageprocess.utils.ArrayUtils;
+
 public class Filters {
 
 	public static Image generateCircle(int radius, int imageSize) {
@@ -39,5 +46,12 @@ public class Filters {
 		g2d.setPaint(new GradientPaint(0, 0, Color.BLUE, imageSize, 0, Color.WHITE));
 		g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
 		return new Image(bufferedImage);
+	}
+
+	public static Image generateHistogramImage(int[] values) {
+		HistogramDataset dataset = new HistogramDataset();
+		dataset.addSeries("values", ArrayUtils.intArrayToDoubleArray(values), 256, 0, 255);
+		JFreeChart chart = ChartFactory.createHistogram("", "", "", dataset, PlotOrientation.VERTICAL, false, false, false);
+		return new Image(chart.createBufferedImage(400, 300));
 	}
 }
