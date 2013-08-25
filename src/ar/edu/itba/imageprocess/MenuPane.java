@@ -44,6 +44,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mGenerateColorGradientBtn;
 
 	// histogram menu
+	private JButton mDesaturateBtn;
 	private JButton mHistogramBtn;
 
 	// noise and blur menu
@@ -114,6 +115,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHistogramBtn.addActionListener(this);
 		menuHistogram.add(mHistogramBtn);
 
+		mDesaturateBtn = new JButton("Desaturate");
+		mDesaturateBtn.addActionListener(this);
+		menuHistogram.add(mDesaturateBtn);
+
 		// noise and blur menu
 
 		JPanel menuNoise = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -136,6 +141,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateColorGradient();
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
+		} else if (e.getSource() == mDesaturateBtn) {
+			mController.desaturate();
 		}
 	}
 

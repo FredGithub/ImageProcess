@@ -14,7 +14,7 @@ public class ArrayUtils {
 		int[] dest = new int[source.length * source[0].length];
 		for (int j = 0; j < source[0].length; j++) {
 			for (int i = 0; i < source.length; i++) {
-				dest[i * source.length + j] = source[i][j];
+				dest[i * source[0].length + j] = source[i][j];
 			}
 		}
 		return dest;

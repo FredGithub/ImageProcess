@@ -134,6 +134,13 @@ public class MainController {
 		}
 	}
 
+	public void desaturate() {
+		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = new Image(mImagePaneSource.getImage().getGrayChannel());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void displayHistogram() {
 		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			int[] values = ArrayUtils.intArray2Dto1D(mImagePaneSource.getImage().getGrayChannel());

@@ -18,7 +18,15 @@ public class Image {
 	private BufferedImage mBufferedImage;
 
 	public Image(BufferedImage bufferedImage) {
-		setBufferedImage(bufferedImage);
+		drawBufferedImage(bufferedImage);
+	}
+
+	public Image(int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+		drawChannels(redChannel, greenChannel, blueChannel);
+	}
+
+	public Image(int[][] grayChannel) {
+		drawGrayChannel(grayChannel);
 	}
 
 	public int getWidth() {
@@ -54,7 +62,7 @@ public class Image {
 	}
 
 	public int getGray(int x, int y) {
-		return (mRedChannel[x][y] + mRedChannel[x][y] + mRedChannel[x][y]) / 3;
+		return (int) (0.2126 * mRedChannel[x][y] + 0.7152 * mGreenChannel[x][y] + 0.0722 * mBlueChannel[x][y]);
 	}
 
 	public int[][] getGrayChannel() {
@@ -99,13 +107,23 @@ public class Image {
 		return mBufferedImage;
 	}
 
-	public void setBufferedImage(BufferedImage bufferedImage) {
+	public int[] getHistogram(int channel) {
+		int[] histogram = new int[256];
+		for (int x = 0; x < mWidth; x++) {
+			for (int y = 0; y < mHeight; y++) {
+				histogram[getChannelColor(x, y, channel)]++;
+			}
+		}
+		return histogram;
+	}
+
+	public void drawBufferedImage(BufferedImage bufferedImage) {
+		mWidth = bufferedImage.getWidth();
+		mHeight = bufferedImage.getHeight();
 		mRedChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
 		mGreenChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
 		mBlueChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
 		mBufferedImage = bufferedImage;
-		mWidth = bufferedImage.getWidth();
-		mHeight = bufferedImage.getHeight();
 
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
@@ -117,13 +135,38 @@ public class Image {
 		}
 	}
 
-	public int[] getHistogram(int channel) {
-		int[] histogram = new int[256];
+	public void drawChannels(int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+		mWidth = redChannel.length;
+		mHeight = redChannel[0].length;
+		mRedChannel = redChannel;
+		mGreenChannel = greenChannel;
+		mBlueChannel = blueChannel;
+
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_ARGB);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				histogram[getChannelColor(x, y, channel)]++;
+				Color color = new Color(mRedChannel[x][y], mGreenChannel[x][y], mBlueChannel[x][y]);
+				mBufferedImage.setRGB(x, y, color.getRGB());
 			}
 		}
-		return histogram;
+	}
+
+	public void drawGrayChannel(int[][] grayChannel) {
+		mWidth = grayChannel.length;
+		mHeight = grayChannel[0].length;
+		mRedChannel = new int[mWidth][mHeight];
+		mGreenChannel = new int[mWidth][mHeight];
+		mBlueChannel = new int[mWidth][mHeight];
+
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_ARGB);
+		for (int x = 0; x < mWidth; x++) {
+			for (int y = 0; y < mHeight; y++) {
+				Color color = new Color(grayChannel[x][y], grayChannel[x][y], grayChannel[x][y]);
+				mBufferedImage.setRGB(x, y, color.getRGB());
+				mRedChannel[x][y] = grayChannel[x][y];
+				mGreenChannel[x][y] = grayChannel[x][y];
+				mBlueChannel[x][y] = grayChannel[x][y];
+			}
+		}
 	}
 }
