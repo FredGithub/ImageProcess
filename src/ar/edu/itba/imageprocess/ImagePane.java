@@ -10,19 +10,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import ar.edu.itba.imageprocess.utils.ExtImageIO;
-import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.Log;
 import ar.edu.itba.imageprocess.utils.StringUtils;
 
@@ -35,8 +29,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	private MainController mController;
 	private int mIndex;
-	private BufferedImage mImage;
-	private ArrayList<BufferedImage> mHistory;
+	private Image mImage;
+	private ArrayList<Image> mHistory;
 	private int mHistoryIndex;
 	private boolean mSource;
 	private boolean mDest;
@@ -53,7 +47,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mController = controller;
 		mIndex = index;
 		mImage = null;
-		mHistory = new ArrayList<BufferedImage>();
+		mHistory = new ArrayList<Image>();
 		mHistoryIndex = -1;
 		mSource = false;
 		mDest = false;
@@ -152,10 +146,9 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		if (mImage != null) {
-			Color color = new Color(mImage.getRGB(e.getX(), e.getY()), true);
-			String red = StringUtils.rightPad(String.valueOf(color.getRed()), 3);
-			String green = StringUtils.rightPad(String.valueOf(color.getGreen()), 3);
-			String blue = StringUtils.rightPad(String.valueOf(color.getBlue()), 3);
+			String red = StringUtils.rightPad(String.valueOf(mImage.getRed(e.getX(), e.getY())), 3);
+			String green = StringUtils.rightPad(String.valueOf(mImage.getGreen(e.getX(), e.getY())), 3);
+			String blue = StringUtils.rightPad(String.valueOf(mImage.getBlue(e.getX(), e.getY())), 3);
 			mPixelLabel.setText("R=" + red + " G=" + green + " B=" + blue);
 		} else {
 			mPixelLabel.setText("---");
@@ -195,14 +188,14 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		updateSelectionColor();
 	}
 
-	public BufferedImage getImage() {
+	public Image getImage() {
 		return mImage;
 	}
 
-	public void setImage(BufferedImage image) {
+	public void setImage(Image image) {
 		mImage = image;
 		if (mImage != null) {
-			mImageLabel.setIcon(new ImageIcon(mImage));
+			mImageLabel.setIcon(new ImageIcon(mImage.getBufferedImage()));
 		} else {
 			mImageLabel.setIcon(null);
 		}
@@ -210,7 +203,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mController.repaintMainFrame();
 	}
 
-	public void setImageWithHistory(BufferedImage image) {
+	public void setImageWithHistory(Image image) {
 		setImage(image);
 		while (mHistoryIndex < mHistory.size() - 1) {
 			mHistory.remove(mHistory.size() - 1);
@@ -233,31 +226,6 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 			mHistoryIndex = futureIndex;
 			setImage(mHistory.get(mHistoryIndex));
 			setHistoryButtonsState();
-		}
-	}
-
-	public void loadImage(File file, int width, int height) {
-		try {
-			String extension = FileUtils.getFileExtension(file);
-			BufferedImage image = null;
-			if (extension.equals("raw")) {
-				image = ExtImageIO.readRaw(file, width, height);
-			} else if (extension.equals("pgm")) {
-				image = ExtImageIO.readPgm(file);
-			} else if (extension.equals("ppm")) {
-				image = ExtImageIO.readPpm(file);
-			} else {
-				image = ImageIO.read(file);
-			}
-			if (image != null) {
-				setImageWithHistory(image);
-			} else {
-				Log.d("couldn't load image " + file.getName());
-			}
-		} catch (IOException e) {
-			Log.d("couldn't open file! " + e);
-		} catch (Exception e) {
-			Log.d("unknown error! " + e);
 		}
 	}
 
