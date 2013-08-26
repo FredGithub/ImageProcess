@@ -1,24 +1,13 @@
 package ar.edu.itba.imageprocess;
 
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.PaintContext;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Scrollbar;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
+import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ExtImageIO;
 import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.Log;
@@ -39,7 +28,7 @@ public class MainController {
 	public void start() {
 		mMainFrame.start();
 	}
-	
+
 	public void repaintMainFrame() {
 		if (mMainFrame != null) {
 			mMainFrame.repaint();
@@ -73,8 +62,29 @@ public class MainController {
 	public void loadImage(File file, int width, int height) {
 		if (mImagePaneDest != null) {
 			Log.d("opening " + file.getName());
-			mImagePaneDest.loadImage(file, width, height);
-			repaintMainFrame();
+			try {
+				String extension = FileUtils.getFileExtension(file);
+				BufferedImage image = null;
+				if (extension.equals("raw")) {
+					image = ExtImageIO.readRaw(file, width, height);
+				} else if (extension.equals("pgm")) {
+					image = ExtImageIO.readPgm(file);
+				} else if (extension.equals("ppm")) {
+					image = ExtImageIO.readPpm(file);
+				} else {
+					image = ImageIO.read(file);
+				}
+				if (image != null) {
+					mImagePaneDest.setImageWithHistory(new Image(image));
+					repaintMainFrame();
+				} else {
+					Log.d("couldn't load image " + file.getName());
+				}
+			} catch (IOException e) {
+				Log.d("couldn't open file! " + e);
+			} catch (Exception e) {
+				Log.d("unknown error! " + e);
+			}
 		}
 	}
 
@@ -84,9 +94,9 @@ public class MainController {
 			String extension = FileUtils.getFileExtension(file);
 			try {
 				if (extension.matches("gif|png|jpe?g")) {
-					ImageIO.write(mImagePaneSource.getImage(), extension, file);
+					ImageIO.write(mImagePaneSource.getImage().getBufferedImage(), extension, file);
 				} else if (extension.matches("raw|pgm|ppm")) {
-					ExtImageIO.write(mImagePaneSource.getImage(), file);
+					ExtImageIO.write(mImagePaneSource.getImage().getBufferedImage(), file);
 				} else {
 					Log.d("unsupported format " + extension);
 				}
@@ -98,67 +108,64 @@ public class MainController {
 
 	public void generateCircle() {
 		if (mImagePaneDest != null) {
-			int imageSize = 256;
-			int radius = 92;
-			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
-			Graphics2D g2d = image.createGraphics();
-			g2d.setColor(Color.WHITE);
-			g2d.fill(new Ellipse2D.Double(imageSize / 2 - radius / 2, imageSize / 2 - radius / 2, radius, radius));
+			Image image = Filters.generateCircle(92, 256);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateSquare() {
 		if (mImagePaneDest != null) {
-			int imageSize = 256;
-			int size = 92;
-			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
-			Graphics2D g2d = image.createGraphics();
-			g2d.setColor(Color.WHITE);
-			g2d.fill(new Rectangle2D.Double(imageSize / 2 - size / 2, imageSize / 2 - size / 2, size, size));
+			Image image = Filters.generateSquare(92, 256);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateGradient() {
 		if (mImagePaneDest != null) {
-			int imageSize = 256;
-			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
-			Graphics2D g2d = image.createGraphics();
-			g2d.setPaint(new GradientPaint(0, 0, Color.GRAY, imageSize, 0, Color.WHITE));
-			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
+			Image image = Filters.generateGradient(256);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void generateColorGradient() {
 		if (mImagePaneDest != null) {
-			int imageSize = 256;
-			BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
-			Graphics2D g2d = image.createGraphics();
-			g2d.setPaint(new GradientPaint(0, 0, Color.BLUE, imageSize, 0, Color.WHITE));
-			g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
+			Image image = Filters.generateColorGradient(256);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
+	public void desaturate() {
+		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = new Image(mImagePaneSource.getImage().getGrayChannel());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void displayHistogram() {
+		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			int[] values = ArrayUtils.intArray2Dto1D(mImagePaneSource.getImage().getGrayChannel());
+			Image image = Filters.generateHistogramImage(values);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+	
 	/**
 	 * TP1-2
 	 * Creates a negative of the image.
 	 */
 	public void filterNegative() {
-		if (mImagePaneDest != null) {
-			BufferedImage image = mImagePaneSource.getImage();
+		if (mImagePaneDest != null && mImagePaneSource.getImage() != null) {
+			Image image = mImagePaneSource.getImage();
 			int width = image.getWidth();
 			int height = image.getHeight();
-			BufferedImage imageDest = new BufferedImage(width, height, image.getType());
+			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
 			
 			for (int i=0; i<image.getWidth(); i++) {
 				for (int j=0; j<image.getHeight(); j++) {
 					imageDest.setRGB(i, j, 0xFFFFFF-image.getRGB(i, j));
 				}
 			}
-			mImagePaneDest.setImageWithHistory(imageDest);
+			mImagePaneDest.setImageWithHistory(new Image(imageDest));
 		}
 	}
 
@@ -168,18 +175,16 @@ public class MainController {
 	 */
 	public void filterThreshold() {
 		if (mImagePaneDest != null) {
-			BufferedImage image = mImagePaneSource.getImage();
+			Image image = mImagePaneSource.getImage();
 			int width = image.getWidth();
 			int height = image.getHeight();
-			BufferedImage imageDest = new BufferedImage(width, height, image.getType());
+			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
 			
 			// TODO - Make sure that you can set the threshold yourself
 			int threshold = 0x888888;
 			for (int i=0; i<image.getWidth(); i++) {
 				for (int j=0; j<image.getHeight(); j++) {
-					// TODO - Why minus..? It works, but why minus?
-					int rgb = -image.getRGB(i, j);
-					if(rgb < threshold) {
+					if(image.getRGB(i, j) < threshold) {
 						imageDest.setRGB(i, j, 0x000000);
 					} else {
 						imageDest.setRGB(i, j, 0xFFFFFF);
@@ -187,7 +192,7 @@ public class MainController {
 				}
 			}
 			
-			mImagePaneDest.setImageWithHistory(imageDest);
+			mImagePaneDest.setImageWithHistory(new Image(imageDest));
 		}		
 	}
 }
