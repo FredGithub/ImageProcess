@@ -127,14 +127,16 @@ public class Image {
 		mRedChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
 		mGreenChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
 		mBlueChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
-		mBufferedImage = bufferedImage;
-
+		mBufferedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+		
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				Color color = new Color(bufferedImage.getRGB(x, y));
+				int rgb = bufferedImage.getRGB(x, y);
+				Color color = new Color(rgb);
 				mRedChannel[x][y] = color.getRed();
 				mGreenChannel[x][y] = color.getGreen();
 				mBlueChannel[x][y] = color.getBlue();
+				mBufferedImage.setRGB(x, y, rgb);
 			}
 		}
 	}
@@ -146,7 +148,7 @@ public class Image {
 		mGreenChannel = greenChannel;
 		mBlueChannel = blueChannel;
 
-		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_ARGB);
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_RGB);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
 				Color color = new Color(mRedChannel[x][y], mGreenChannel[x][y], mBlueChannel[x][y]);
@@ -162,7 +164,7 @@ public class Image {
 		mGreenChannel = new int[mWidth][mHeight];
 		mBlueChannel = new int[mWidth][mHeight];
 
-		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_ARGB);
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_BYTE_GRAY);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
 				Color color = new Color(grayChannel[x][y], grayChannel[x][y], grayChannel[x][y]);
@@ -174,3 +176,4 @@ public class Image {
 		}
 	}
 }
+

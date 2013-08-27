@@ -68,6 +68,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		add(mImagePane, c);
 
 		mImageLabel = new JLabel();
+		mImageLabel.addMouseListener(this);
 		mImageLabel.addMouseMotionListener(this);
 		mImagePane.add(mImageLabel);
 
@@ -129,7 +130,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if (e.getSource() == mImagePane) {
+		if (e.getSource() == mImagePane || e.getSource() == mImageLabel) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
 				mController.selectSourceImagePane(this);
 				mController.selectDestImagePane(this);
