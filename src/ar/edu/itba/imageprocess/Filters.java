@@ -18,17 +18,13 @@ import ar.edu.itba.imageprocess.utils.Log;
 public class Filters {
 
 	public static Image generateWhiteImage(int width, int height) {
-		int[][] redChannel = new int[width][height];
-		int[][] greenChannel = new int[width][height];
-		int[][] blueChannel = new int[width][height];
+		int[][] grayChannel = new int[width][height];
 		for(int x=0; x<width; x++){
 			for(int y=0; y<width; y++){
-				redChannel[x][y] = 255;
-				greenChannel[x][y] = 255;
-				blueChannel[x][y] = 255;
+				grayChannel[x][y] = 255;
 			}
 		}
-		return new Image(redChannel, greenChannel, blueChannel);
+		return new Image(grayChannel);
 	}
 	
 	public static Image generateCircle(int radius, int imageSize) {
@@ -70,18 +66,25 @@ public class Filters {
 		return new Image(chart.createBufferedImage(400, 300));
 	}
 	
+	/**
+	 * Warning! This function will take the type (gray or RGB) of image1
+	 * So if 
+	 */
 	public static Image addImages(Image image1, Image image2){
+		// images must be the same size
 		if(image1.getWidth() != image2.getWidth() || image1.getHeight() != image2.getHeight()){
 			Log.d("images must be the same size");
 			return null;
 		}
 		
+		// prepare the new image channel arrays
 		int width = image1.getWidth();
 		int height = image1.getHeight();
 		int[][] redChannel = new int[width][height];
 		int[][] greenChannel = new int[width][height];
 		int[][] blueChannel = new int[width][height];
 		
+		// add each pixel one by one
 		for(int x=0; x<width; x++){
 			for(int y=0; y<height; y++){
 				redChannel[x][y] = image1.getRed(x, y) + image2.getRed(x, y);
@@ -90,6 +93,6 @@ public class Filters {
 			}
 		}
 		
-		return new Image(redChannel, greenChannel, blueChannel);
+		return new Image(redChannel, greenChannel, blueChannel, image1.getBufferedImage().getType());
 	}
 }

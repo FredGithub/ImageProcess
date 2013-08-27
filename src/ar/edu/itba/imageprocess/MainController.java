@@ -142,10 +142,12 @@ public class MainController {
 	}
 
 	public void addImages() {
-		if (mImagePaneDest != null) {
-			ImagePane[] imagePanes = mMainFrame.getImagePanes();
+		ImagePane[] imagePanes = mMainFrame.getImagePanes();
+		if (mImagePaneDest != null && imagePanes[0].getImage() != null && imagePanes[1].getImage() != null) {
 			Image image = Filters.addImages(imagePanes[0].getImage(), imagePanes[1].getImage());
-			mImagePaneDest.setImageWithHistory(image);
+			if(image != null){
+				mImagePaneDest.setImageWithHistory(image);
+			}
 		}
 	}
 

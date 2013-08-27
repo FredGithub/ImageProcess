@@ -3,6 +3,20 @@ package ar.edu.itba.imageprocess;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+
+/**
+ * 
+ * Image class
+ * This class holds both 3 array of ints that represent its colors
+ * and a BufferedImage. The BufferedImage colors are always trimmed 
+ * between 0 and 255 with the method trimColor. The 3 arrays however 
+ * are allowed to have values lower than 0 or higher than 255. 
+ * This allows to apply algorithm on the image that will give values 
+ * outside of the [0, 255] range, and only after compress these values
+ * with the compress method
+ *
+ */
+
 public class Image {
 
 	public static final int CHANNEL_GRAY = 0;
@@ -21,8 +35,8 @@ public class Image {
 		drawBufferedImage(bufferedImage);
 	}
 
-	public Image(int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
-		drawChannels(redChannel, greenChannel, blueChannel);
+	public Image(int[][] redChannel, int[][] greenChannel, int[][] blueChannel, int type) {
+		drawChannels(redChannel, greenChannel, blueChannel, type);
 	}
 
 	public Image(int[][] grayChannel) {
@@ -140,18 +154,22 @@ public class Image {
 			}
 		}
 	}
-
-	public void drawChannels(int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+	
+	/**
+	 * The parameter type is needed to force the type of the image
+	 * and do a workaround of the BufferedImage brightening issue
+	 */
+	public void drawChannels(int[][] redChannel, int[][] greenChannel, int[][] blueChannel, int type) {
 		mWidth = redChannel.length;
 		mHeight = redChannel[0].length;
 		mRedChannel = redChannel;
 		mGreenChannel = greenChannel;
 		mBlueChannel = blueChannel;
 
-		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_RGB);
+		mBufferedImage = new BufferedImage(mWidth, mHeight, type);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				Color color = new Color(mRedChannel[x][y], mGreenChannel[x][y], mBlueChannel[x][y]);
+				Color color = new Color(trimColor(mRedChannel[x][y]), trimColor(mGreenChannel[x][y]), trimColor(mBlueChannel[x][y]));
 				mBufferedImage.setRGB(x, y, color.getRGB());
 			}
 		}
@@ -167,13 +185,17 @@ public class Image {
 		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_BYTE_GRAY);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				Color color = new Color(grayChannel[x][y], grayChannel[x][y], grayChannel[x][y]);
+				Color color = new Color(trimColor(grayChannel[x][y]), trimColor(grayChannel[x][y]), trimColor(grayChannel[x][y]));
 				mBufferedImage.setRGB(x, y, color.getRGB());
 				mRedChannel[x][y] = grayChannel[x][y];
 				mGreenChannel[x][y] = grayChannel[x][y];
 				mBlueChannel[x][y] = grayChannel[x][y];
 			}
 		}
+	}
+	
+	private int trimColor(int value){
+		return Math.min(255, Math.max(0, value));
 	}
 }
 
