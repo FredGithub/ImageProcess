@@ -148,4 +148,51 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+	
+	/**
+	 * TP1-2
+	 * Creates a negative of the image.
+	 */
+	public void filterNegative() {
+		if (mImagePaneDest != null && mImagePaneSource.getImage() != null) {
+			Image image = mImagePaneSource.getImage();
+			int width = image.getWidth();
+			int height = image.getHeight();
+			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
+			
+			for (int i=0; i<image.getWidth(); i++) {
+				for (int j=0; j<image.getHeight(); j++) {
+					imageDest.setRGB(i, j, 0xFFFFFF-image.getRGB(i, j));
+				}
+			}
+			mImagePaneDest.setImageWithHistory(new Image(imageDest));
+		}
+	}
+
+	/**
+	 * TP1-5
+	 * Creates a threshold version of the image.
+	 */
+	public void filterThreshold() {
+		if (mImagePaneDest != null) {
+			Image image = mImagePaneSource.getImage();
+			int width = image.getWidth();
+			int height = image.getHeight();
+			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
+			
+			// TODO - Make sure that you can set the threshold yourself
+			int threshold = 0x888888;
+			for (int i=0; i<image.getWidth(); i++) {
+				for (int j=0; j<image.getHeight(); j++) {
+					if(image.getRGB(i, j) < threshold) {
+						imageDest.setRGB(i, j, 0x000000);
+					} else {
+						imageDest.setRGB(i, j, 0xFFFFFF);
+					}
+				}
+			}
+			
+			mImagePaneDest.setImageWithHistory(new Image(imageDest));
+		}		
+	}
 }

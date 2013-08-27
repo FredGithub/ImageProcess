@@ -60,6 +60,10 @@ public class Image {
 	public int getBlue(int x, int y) {
 		return mBlueChannel[x][y];
 	}
+	
+	public int getRGB(int x, int y) {
+		return getRed(x, y)*16*16*16*16 + getGreen(x, y)*16*16 + getBlue(x, y);
+	}
 
 	public int getGray(int x, int y) {
 		return (int) (0.2126 * mRedChannel[x][y] + 0.7152 * mGreenChannel[x][y] + 0.0722 * mBlueChannel[x][y]);
@@ -172,3 +176,4 @@ public class Image {
 		}
 	}
 }
+

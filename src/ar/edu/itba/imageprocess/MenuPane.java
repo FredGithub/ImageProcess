@@ -42,6 +42,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mGenerateSquareBtn;
 	private JButton mGenerateGradientBtn;
 	private JButton mGenerateColorGradientBtn;
+	
+	private JButton mFilterNegative;
+	private JButton mFilterThreshold;
 
 	// histogram menu
 	private JButton mDesaturateBtn;
@@ -104,6 +107,20 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		mGenerateColorGradientBtn = new JButton("Color gradient");
 		mGenerateColorGradientBtn.addActionListener(this);
+		
+		// file menu
+
+		JPanel menu3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Filter", menu3);
+		
+		mFilterNegative = new JButton("Negative");
+		mFilterNegative.addActionListener(this);
+		menu3.add(mFilterNegative);
+
+		mFilterThreshold = new JButton("Threshold");
+		mFilterThreshold.addActionListener(this);
+		menu3.add(mFilterThreshold);
+
 		menuShape.add(mGenerateColorGradientBtn);
 
 		// histogram menu
@@ -139,6 +156,10 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateGradient();
 		} else if (e.getSource() == mGenerateColorGradientBtn) {
 			mController.generateColorGradient();
+		} else if (e.getSource() == mFilterNegative) {
+			mController.filterNegative();
+		} else if (e.getSource() == mFilterThreshold) {
+			mController.filterThreshold();
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
 		} else if (e.getSource() == mDesaturateBtn) {
