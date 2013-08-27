@@ -37,11 +37,16 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mLoadBtn;
 	private JButton mSaveBtn;
 
-	// share generation menu
+	// simple process menu
+	private JButton mGenerateWhite;
 	private JButton mGenerateCircleBtn;
 	private JButton mGenerateSquareBtn;
 	private JButton mGenerateGradientBtn;
 	private JButton mGenerateColorGradientBtn;
+	private JButton mAddImages;
+	private JButton mSubtractImages;
+	private JButton mMultiplyScalar;
+	private JButton mCompression;
 	
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
@@ -88,11 +93,15 @@ public class MenuPane extends JPanel implements ActionListener {
 		mSaveBtn.addActionListener(this);
 		menuFile.add(mSaveBtn);
 
-		// share generation menu
+		// simple process menu
 
 		JPanel menuShape = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Shape generation", menuShape);
+		tabbedPane.addTab("Simple process", menuShape);
 
+		mGenerateWhite = new JButton("White");
+		mGenerateWhite.addActionListener(this);
+		menuShape.add(mGenerateWhite);
+		
 		mGenerateCircleBtn = new JButton("Circle");
 		mGenerateCircleBtn.addActionListener(this);
 		menuShape.add(mGenerateCircleBtn);
@@ -107,6 +116,23 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		mGenerateColorGradientBtn = new JButton("Color gradient");
 		mGenerateColorGradientBtn.addActionListener(this);
+		menuShape.add(mGenerateColorGradientBtn);
+		
+		mAddImages = new JButton("Add");
+		mAddImages.addActionListener(this);
+		menuShape.add(mAddImages);
+		
+		mSubtractImages = new JButton("Subtract");
+		mSubtractImages.addActionListener(this);
+		menuShape.add(mSubtractImages);
+		
+		mMultiplyScalar = new JButton("Multiply");
+		mMultiplyScalar.addActionListener(this);
+		menuShape.add(mMultiplyScalar);
+		
+		mCompression = new JButton("Compression");
+		mCompression.addActionListener(this);
+		menuShape.add(mCompression);
 		
 		// file menu
 
@@ -120,8 +146,6 @@ public class MenuPane extends JPanel implements ActionListener {
 		mFilterThreshold = new JButton("Threshold");
 		mFilterThreshold.addActionListener(this);
 		menu3.add(mFilterThreshold);
-
-		menuShape.add(mGenerateColorGradientBtn);
 
 		// histogram menu
 
@@ -148,6 +172,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			loadImage();
 		} else if (e.getSource() == mSaveBtn) {
 			saveImage();
+		} else if (e.getSource() == mGenerateWhite) {
+			mController.generateWhiteImage();
 		} else if (e.getSource() == mGenerateCircleBtn) {
 			mController.generateCircle();
 		} else if (e.getSource() == mGenerateSquareBtn) {
@@ -156,6 +182,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.generateGradient();
 		} else if (e.getSource() == mGenerateColorGradientBtn) {
 			mController.generateColorGradient();
+		} else if (e.getSource() == mAddImages) {
+			mController.addImages();
+		} else if (e.getSource() == mSubtractImages) {
+			mController.subtractImages();
+		} else if (e.getSource() == mMultiplyScalar) {
+			mController.multiplyScalar();
+		} else if (e.getSource() == mCompression) {
+			mController.compress();
 		} else if (e.getSource() == mFilterNegative) {
 			mController.filterNegative();
 		} else if (e.getSource() == mFilterThreshold) {

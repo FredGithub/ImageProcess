@@ -13,11 +13,26 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.statistics.HistogramDataset;
 
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
+import ar.edu.itba.imageprocess.utils.Log;
 
 public class Filters {
 
+	public static Image generateWhiteImage(int width, int height) {
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+		for(int x=0; x<width; x++){
+			for(int y=0; y<width; y++){
+				redChannel[x][y] = 255;
+				greenChannel[x][y] = 255;
+				blueChannel[x][y] = 255;
+			}
+		}
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+	
 	public static Image generateCircle(int radius, int imageSize) {
-		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
+		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
 		Graphics2D g2d = bufferedImage.createGraphics();
 		g2d.setColor(Color.WHITE);
 		g2d.fill(new Ellipse2D.Double(imageSize / 2 - radius / 2, imageSize / 2 - radius / 2, radius, radius));
@@ -25,7 +40,7 @@ public class Filters {
 	}
 
 	public static Image generateSquare(int size, int imageSize) {
-		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_BINARY);
+		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
 		Graphics2D g2d = bufferedImage.createGraphics();
 		g2d.setColor(Color.WHITE);
 		g2d.fill(new Rectangle2D.Double(imageSize / 2 - size / 2, imageSize / 2 - size / 2, size, size));
@@ -53,5 +68,28 @@ public class Filters {
 		dataset.addSeries("values", ArrayUtils.intArrayToDoubleArray(values), 256, 0, 255);
 		JFreeChart chart = ChartFactory.createHistogram("", "", "", dataset, PlotOrientation.VERTICAL, false, false, false);
 		return new Image(chart.createBufferedImage(400, 300));
+	}
+	
+	public static Image addImages(Image image1, Image image2){
+		if(image1.getWidth() != image2.getWidth() || image1.getHeight() != image2.getHeight()){
+			Log.d("images must be the same size");
+			return null;
+		}
+		
+		int width = image1.getWidth();
+		int height = image1.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+		
+		for(int x=0; x<width; x++){
+			for(int y=0; y<height; y++){
+				redChannel[x][y] = image1.getRed(x, y) + image2.getRed(x, y);
+				greenChannel[x][y] = image1.getGreen(x, y) + image2.getGreen(x, y);
+				blueChannel[x][y] = image1.getBlue(x, y) + image2.getBlue(x, y);
+			}
+		}
+		
+		return new Image(redChannel, greenChannel, blueChannel);
 	}
 }

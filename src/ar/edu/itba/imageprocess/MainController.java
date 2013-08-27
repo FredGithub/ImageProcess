@@ -106,6 +106,13 @@ public class MainController {
 		}
 	}
 
+	public void generateWhiteImage() {
+		if (mImagePaneDest != null) {
+			Image image = Filters.generateWhiteImage(256, 256);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+	
 	public void generateCircle() {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateCircle(92, 256);
@@ -131,6 +138,32 @@ public class MainController {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateColorGradient(256);
 			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void addImages() {
+		if (mImagePaneDest != null) {
+			ImagePane[] imagePanes = mMainFrame.getImagePanes();
+			Image image = Filters.addImages(imagePanes[0].getImage(), imagePanes[1].getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void subtractImages() {
+		if (mImagePaneDest != null) {
+			
+		}
+	}
+
+	public void multiplyScalar() {
+		if (mImagePaneDest != null) {
+			
+		}
+	}
+
+	public void compress() {
+		if (mImagePaneDest != null) {
+			
 		}
 	}
 
