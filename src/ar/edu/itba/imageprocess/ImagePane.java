@@ -69,6 +69,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 		mImageLabel = new JLabel();
 		mImageLabel.addMouseMotionListener(this);
+		mImageLabel.addMouseListener(this);
 		mImagePane.add(mImageLabel);
 
 		mPrevBtn = new JButton("Prev");
@@ -129,7 +130,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		if (e.getSource() == mImagePane) {
+		if (e.getSource() == mImagePane || e.getSource() == mImageLabel) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
 				mController.selectSourceImagePane(this);
 				mController.selectDestImagePane(this);
