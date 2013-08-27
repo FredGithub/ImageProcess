@@ -49,6 +49,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	// histogram menu
 	private JButton mDesaturateBtn;
 	private JButton mHistogramBtn;
+	private JButton mEqualizeBtn;
 
 	// noise and blur menu
 
@@ -135,6 +136,11 @@ public class MenuPane extends JPanel implements ActionListener {
 		mDesaturateBtn = new JButton("Desaturate");
 		mDesaturateBtn.addActionListener(this);
 		menuHistogram.add(mDesaturateBtn);
+		
+		mEqualizeBtn = new JButton("Equalize");
+		mEqualizeBtn.addActionListener(this);
+		menuHistogram.add(mEqualizeBtn);
+		
 
 		// noise and blur menu
 
@@ -164,6 +170,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.displayHistogram();
 		} else if (e.getSource() == mDesaturateBtn) {
 			mController.desaturate();
+		} else if (e.getSource() == mEqualizeBtn) {
+			mController.filterEqualize();
 		}
 	}
 

@@ -195,4 +195,89 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(new Image(imageDest));
 		}		
 	}
+	
+	/**
+	 * TP1-6
+	 * histogram equalization
+	 */
+
+	public int[] filterEqualize() {
+		Image image = mImagePaneSource.getImage();		
+		// rk es el k-ésimo nivel de gris que vara en el intervalo [0; L-1].
+		
+		
+		//  let ni be the number of occurrences of gray level i
+		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
+		
+		// n is the total number of pixels in the image
+		int n = image.getWidth()*image.getHeight();
+		
+		// px is the probability of an occurrence of a pixel of level i in the image
+		// px is the image's histogram for pixel value i, normalized to [0,1]
+		// cdfx is the cdf corresponding to px and the image's accumulated normalized histogram.
+		double[] px = new double[ni.length];
+		for (int i=0; i<px.length; i++) {
+			px[i] = ni[i]/n;
+		}
+		
+		int[] cdfx = new int[ni.length];
+		cdfx[0] = ni[0];
+		for (int i=1; i<cdfx.length; i++) {
+			cdfx[i] = cdfx[i-1]+ni[i];
+		}
+		
+		int[] cuFeq = new int[ni.length];
+		for (int i=0; i<cuFeq.length; i++) {
+			cuFeq[i] = (int)(cdfx[i+1]/cdfx.length);
+		}
+		
+		int[] output = new int[ni.length];
+		for (int i=0; i<ni.length; i++) {
+			
+		}
+		
+		
+		
+		
+		
+		double[] sktak = new double[px.length];
+		for (int i=0; i<px.length; i++) {
+			sktak[i] = (int)((px[i]-min(px))/(1-min(px))+0.5);
+		}
+		
+		
+
+		
+		int[][] pic = new int[image.getWidth()][image.getHeight()];
+		
+		for (int x=0; x<image.getWidth(); x++) {
+			for (int y=0; y<image.getHeight(); y++) {
+				pic[x][y] = (int)(image.getGray(x, y));
+			}
+		}
+		
+		mImagePaneDest.setImageWithHistory(new Image(pic));
+		return null;
+	}
+	
+
+	private double min(double[] px) {
+		double min = px[0];
+		for (double i : px) {
+			if (i < min) {
+				min = i;
+			}
+		}
+		return min;
+	}
+	
+	private int max(int[] arr) {
+		int max = arr[0];
+		for (int i : arr) {
+			if (i > max) {
+				max = i;
+			}
+		}
+		return max;
+	}
 }
