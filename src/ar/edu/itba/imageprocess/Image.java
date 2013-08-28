@@ -3,6 +3,15 @@ package ar.edu.itba.imageprocess;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+/**
+ * Image class This class holds both 3 array of ints that represent its colors
+ * and a BufferedImage. The BufferedImage colors are always trimmed between 0
+ * and 255 with the method trimColor. The 3 arrays however are allowed to have
+ * values lower than 0 or higher than 255. This allows to apply algorithm on the
+ * image that will give values outside of the [0, 255] range, and only after
+ * compress these values with the compress method
+ */
+
 public class Image {
 
 	public static final int CHANNEL_GRAY = 0;
@@ -60,9 +69,9 @@ public class Image {
 	public int getBlue(int x, int y) {
 		return mBlueChannel[x][y];
 	}
-	
+
 	public int getRGB(int x, int y) {
-		return getRed(x, y)*16*16*16*16 + getGreen(x, y)*16*16 + getBlue(x, y);
+		return getRed(x, y) * 256 * 256 + getGreen(x, y) * 256 + getBlue(x, y);
 	}
 
 	public int getGray(int x, int y) {
@@ -124,19 +133,18 @@ public class Image {
 	public void drawBufferedImage(BufferedImage bufferedImage) {
 		mWidth = bufferedImage.getWidth();
 		mHeight = bufferedImage.getHeight();
-		mRedChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
-		mGreenChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
-		mBlueChannel = new int[bufferedImage.getWidth()][bufferedImage.getHeight()];
-		mBufferedImage = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
-		
+		mRedChannel = new int[mWidth][mHeight];
+		mGreenChannel = new int[mWidth][mHeight];
+		mBlueChannel = new int[mWidth][mHeight];
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_RGB);
+
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				int rgb = bufferedImage.getRGB(x, y);
-				Color color = new Color(rgb);
+				Color color = new Color(bufferedImage.getRGB(x, y));
 				mRedChannel[x][y] = color.getRed();
 				mGreenChannel[x][y] = color.getGreen();
 				mBlueChannel[x][y] = color.getBlue();
-				mBufferedImage.setRGB(x, y, rgb);
+				mBufferedImage.setRGB(x, y, color.getRGB());
 			}
 		}
 	}
@@ -144,14 +152,17 @@ public class Image {
 	public void drawChannels(int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
 		mWidth = redChannel.length;
 		mHeight = redChannel[0].length;
-		mRedChannel = redChannel;
-		mGreenChannel = greenChannel;
-		mBlueChannel = blueChannel;
-
+		mRedChannel = new int[mWidth][mHeight];
+		mGreenChannel = new int[mWidth][mHeight];
+		mBlueChannel = new int[mWidth][mHeight];
 		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_RGB);
+
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				Color color = new Color(mRedChannel[x][y], mGreenChannel[x][y], mBlueChannel[x][y]);
+				Color color = new Color(trimColor(redChannel[x][y]), trimColor(greenChannel[x][y]), trimColor(blueChannel[x][y]));
+				mRedChannel[x][y] = redChannel[x][y];
+				mGreenChannel[x][y] = greenChannel[x][y];
+				mBlueChannel[x][y] = blueChannel[x][y];
 				mBufferedImage.setRGB(x, y, color.getRGB());
 			}
 		}
@@ -163,17 +174,20 @@ public class Image {
 		mRedChannel = new int[mWidth][mHeight];
 		mGreenChannel = new int[mWidth][mHeight];
 		mBlueChannel = new int[mWidth][mHeight];
+		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_INT_RGB);
 
-		mBufferedImage = new BufferedImage(mWidth, mHeight, BufferedImage.TYPE_BYTE_GRAY);
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				Color color = new Color(grayChannel[x][y], grayChannel[x][y], grayChannel[x][y]);
-				mBufferedImage.setRGB(x, y, color.getRGB());
+				Color color = new Color(trimColor(grayChannel[x][y]), trimColor(grayChannel[x][y]), trimColor(grayChannel[x][y]));
 				mRedChannel[x][y] = grayChannel[x][y];
 				mGreenChannel[x][y] = grayChannel[x][y];
 				mBlueChannel[x][y] = grayChannel[x][y];
+				mBufferedImage.setRGB(x, y, color.getRGB());
 			}
 		}
 	}
-}
 
+	private int trimColor(int value) {
+		return Math.min(255, Math.max(0, value));
+	}
+}
