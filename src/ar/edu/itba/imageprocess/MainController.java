@@ -308,6 +308,7 @@ public class MainController {
 		
 		int[][] newGrayChannel = new int[width][height];
 		
+		// TODO - make these changeable
 		int spread = 5;
 		int average = 10;
 		
@@ -327,6 +328,7 @@ public class MainController {
 		
 		int[][] newGrayChannel = new int[width][height];
 		
+		// TODO - make this changeable
 		int p = 2;
 		
 		for (int x=0; x<width; x++) {
@@ -345,6 +347,7 @@ public class MainController {
 		
 		int[][] newGrayChannel = new int[width][height];
 		
+		// TODO - make this changeable
 		int p = 2;
 		
 		for (int x=0; x<width; x++) {
