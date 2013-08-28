@@ -165,9 +165,10 @@ public class MainController {
 		}
 	}
 
-	public void multiplyScalar() {
+	public void multiplyScalar(double scalar) {
 		if (mImagePaneDest != null) {
-
+			Image image = Filters.multiplyScalar(mImagePaneSource.getImage(), scalar);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 

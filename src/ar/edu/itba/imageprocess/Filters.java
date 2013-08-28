@@ -120,6 +120,26 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image multiplyScalar(Image image, double scalar) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// multiply each pixel one by one
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				redChannel[x][y] = (int) (image.getRed(x, y) * scalar);
+				greenChannel[x][y] = (int) (image.getGreen(x, y) * scalar);
+				blueChannel[x][y] = (int) (image.getBlue(x, y) * scalar);
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
 	public static Image compress(Image image) {
 		int[][] grayChannel = image.getGrayChannel();
 		int[][] newGrayChannel = new int[image.getWidth()][image.getHeight()];

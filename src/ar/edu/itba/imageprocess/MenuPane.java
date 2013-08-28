@@ -187,7 +187,8 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mSubtractImages) {
 			mController.subtractImages();
 		} else if (e.getSource() == mMultiplyScalar) {
-			mController.multiplyScalar();
+			// TODO make this choosable
+			mController.multiplyScalar(1.5);
 		} else if (e.getSource() == mCompression) {
 			mController.compress();
 		} else if (e.getSource() == mFilterNegative) {
