@@ -228,31 +228,21 @@ public class MainController {
 		
 		int[] cuFeq = new int[ni.length];
 		for (int i=0; i<cuFeq.length; i++) {
-			cuFeq[i] = (int)(cdfx[i+1]/cdfx.length);
+			cuFeq[i] = (int)(cdfx[i]/cdfx.length);
 		}
 		
 		int[] output = new int[ni.length];
 		for (int i=0; i<ni.length; i++) {
-			
-		}
+			output[i] = blabb(i, cuFeq);
+			System.out.println(i + ", " + blabb(i, cuFeq) + ", " + ni[i]);
+		} 
 		
-		
-		
-		
-		
-		double[] sktak = new double[px.length];
-		for (int i=0; i<px.length; i++) {
-			sktak[i] = (int)((px[i]-min(px))/(1-min(px))+0.5);
-		}
-		
-		
-
 		
 		int[][] pic = new int[image.getWidth()][image.getHeight()];
 		
 		for (int x=0; x<image.getWidth(); x++) {
 			for (int y=0; y<image.getHeight(); y++) {
-				pic[x][y] = (int)(image.getGray(x, y));
+				pic[x][y] = (int)(output[image.getGray(x, y)]);
 			}
 		}
 		
@@ -260,6 +250,18 @@ public class MainController {
 		return null;
 	}
 	
+
+	private int blabb(int n, int[] cuFeq) {
+		int min = Math.abs(n-cuFeq[0]);
+		int minindex = 0;
+		for (int i=1; i<cuFeq.length; i++) {
+			if (Math.abs(n-cuFeq[i]) < min) {
+				min = Math.abs(n-cuFeq[i]);
+				minindex = i;
+			}
+		}
+		return minindex;
+	}
 
 	private double min(double[] px) {
 		double min = px[0];
