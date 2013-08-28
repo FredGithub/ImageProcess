@@ -55,10 +55,15 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mHistogramBtn;
 	private JButton mEqualizeBtn;
 
-	// noise and blur menu
+	// noise and mask menu
 	private JButton mGaussianTest;
 	private JButton mRayleighTest;
 	private JButton mExponentialTest;
+	private JButton mPepperAndSalt;
+	private JButton mMaskAverage;
+	private JButton mMaskGaussian;
+	private JButton mMaskHighPass;
+	private JButton mMaskMedian;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -167,7 +172,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		mEqualizeBtn.addActionListener(this);
 		menuHistogram.add(mEqualizeBtn);
 
-		// noise and blur menu
+		// noise and mask menu
 
 		JPanel menuNoise = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		tabbedPane.addTab("Noise and blur", menuNoise);
@@ -183,6 +188,26 @@ public class MenuPane extends JPanel implements ActionListener {
 		mExponentialTest = new JButton("Exponential test");
 		mExponentialTest.addActionListener(this);
 		menuNoise.add(mExponentialTest);
+
+		mPepperAndSalt = new JButton("Pepper and salt");
+		mPepperAndSalt.addActionListener(this);
+		menuNoise.add(mPepperAndSalt);
+
+		mMaskAverage = new JButton("Average mask");
+		mMaskAverage.addActionListener(this);
+		menuNoise.add(mMaskAverage);
+
+		mMaskGaussian = new JButton("Gaussian mask");
+		mMaskGaussian.addActionListener(this);
+		// menuNoise.add(mMaskGaussian);
+
+		mMaskHighPass = new JButton("High pass mask");
+		mMaskHighPass.addActionListener(this);
+		menuNoise.add(mMaskHighPass);
+
+		mMaskMedian = new JButton("Median mask");
+		mMaskMedian.addActionListener(this);
+		menuNoise.add(mMaskMedian);
 	}
 
 	@Override
@@ -241,6 +266,41 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
 			if (params.ask()) {
 				mController.displayExponentialChart(params.getDouble("param"));
+			}
+		} else if (e.getSource() == mPepperAndSalt) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p0", 0, 1, "0.02"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p1", 0, 1, "0.98"));
+			if (params.ask()) {
+				mController.applyPepperAndSalt(params.getDouble("p0"), params.getDouble("p1"));
+			}
+		} else if (e.getSource() == mMaskAverage) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			if (params.ask()) {
+				mController.applyFactorMaskFilter(params.getInteger("width"), params.getInteger("height"), Filters.MASK_FILTER_AVERAGE);
+			}
+		} else if (e.getSource() == mMaskGaussian) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			if (params.ask()) {
+				mController.applyFactorMaskFilter(params.getInteger("width"), params.getInteger("height"), Filters.MASK_FILTER_GAUSSIAN);
+			}
+		} else if (e.getSource() == mMaskHighPass) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			if (params.ask()) {
+				mController.applyFactorMaskFilter(params.getInteger("width"), params.getInteger("height"), Filters.MASK_FILTER_HIGH_PASS);
+			}
+		} else if (e.getSource() == mMaskMedian) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			if (params.ask()) {
+				mController.applyMedianMaskFilter(params.getInteger("width"), params.getInteger("height"));
 			}
 		}
 	}

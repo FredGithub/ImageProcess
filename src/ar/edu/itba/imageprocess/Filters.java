@@ -16,6 +16,9 @@ public class Filters {
 
 	public static final int CHART_WIDTH = 400;
 	public static final int CHART_HEIGHT = 300;
+	public static final int MASK_FILTER_AVERAGE = 1;
+	public static final int MASK_FILTER_GAUSSIAN = 2;
+	public static final int MASK_FILTER_HIGH_PASS = 3;
 
 	public static Image generateWhiteImage(int width, int height) {
 		int[][] grayChannel = new int[width][height];
@@ -190,5 +193,141 @@ public class Filters {
 			data[i] = RandGenerator.exponential(param);
 		}
 		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, data, 100));
+	}
+
+	public static Image applyPepperAndSalt(Image image, double p0, double p1) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// apply the noise to each pixel of the image
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				double rand = Math.random();
+				if (rand <= p0) {
+					redChannel[x][y] = 0;
+					greenChannel[x][y] = 0;
+					blueChannel[x][y] = 0;
+				} else if (rand >= p1) {
+					redChannel[x][y] = 255;
+					greenChannel[x][y] = 255;
+					blueChannel[x][y] = 255;
+				} else {
+					redChannel[x][y] = image.getRed(x, y);
+					greenChannel[x][y] = image.getGreen(x, y);
+					blueChannel[x][y] = image.getBlue(x, y);
+				}
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image applyFactorMaskFilter(Image image, int maskWidth, int maskHeight, int filterType) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// get the position of the pixel at the center of the mask
+		// if one side has an even length, for example maskWidth = 8
+		// the center is considered to be 3 (the fourth column)
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// setup the mask and the factor
+		int[][] mask = new int[maskWidth][maskHeight];
+		double factor = 0;
+		if (filterType == MASK_FILTER_AVERAGE) {
+			factor = 1.0 / (maskWidth * maskHeight);
+			for (int x = 0; x < maskWidth; x++) {
+				for (int y = 0; y < maskHeight; y++) {
+					mask[x][y] = 1;
+				}
+			}
+		} else if (filterType == MASK_FILTER_GAUSSIAN) {
+
+		} else if (filterType == MASK_FILTER_HIGH_PASS) {
+			factor = 1.0 / (maskWidth * maskHeight);
+			for (int x = 0; x < maskWidth; x++) {
+				for (int y = 0; y < maskHeight; y++) {
+					if (x == offsetX && y == offsetY) {
+						mask[x][y] = 8;
+					} else {
+						mask[x][y] = -1;
+					}
+				}
+			}
+		}
+
+		// apply the mask on each pixel of the image
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				double redSum = 0;
+				double greenSum = 0;
+				double blueSum = 0;
+
+				// iterate over the mask for that pixel
+				for (int x = 0; x < maskWidth; x++) {
+					for (int y = 0; y < maskHeight; y++) {
+						redSum += mask[x][y] * image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
+						greenSum += mask[x][y] * image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
+						blueSum += mask[x][y] * image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
+					}
+				}
+
+				// set the new image pixels
+				redChannel[pixelX][pixelY] = (int) (redSum * factor);
+				greenChannel[pixelX][pixelY] = (int) (greenSum * factor);
+				blueChannel[pixelX][pixelY] = (int) (blueSum * factor);
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image applyMedianMaskFilter(Image image, int maskWidth, int maskHeight) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// get the position of the pixel at the center of the mask
+		// if one side has an even length, for example maskWidth = 8
+		// the center is considered to be 3 (the fourth column)
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// apply the mask on each pixel of the image
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				int[] redValues = new int[maskWidth * maskHeight];
+				int[] greenValues = new int[maskWidth * maskHeight];
+				int[] blueValues = new int[maskWidth * maskHeight];
+
+				// get all the pixels values under the mask
+				for (int x = 0; x < maskWidth; x++) {
+					for (int y = 0; y < maskHeight; y++) {
+						redValues[x * maskHeight + y] = image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
+						greenValues[x * maskHeight + y] = image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
+						blueValues[x * maskHeight + y] = image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
+					}
+				}
+
+				// set the new image pixels to the median
+				redChannel[pixelX][pixelY] = (int) (ArrayUtils.median(redValues));
+				greenChannel[pixelX][pixelY] = (int) (ArrayUtils.median(greenValues));
+				blueChannel[pixelX][pixelY] = (int) (ArrayUtils.median(blueValues));
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
 	}
 }

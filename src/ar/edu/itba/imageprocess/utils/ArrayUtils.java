@@ -1,5 +1,7 @@
 package ar.edu.itba.imageprocess.utils;
 
+import java.util.Arrays;
+
 public class ArrayUtils {
 
 	public static double[] intArrayToDoubleArray(int[] source) {
@@ -62,5 +64,16 @@ public class ArrayUtils {
 			}
 		}
 		return min;
+	}
+
+	public static double median(int[] source) {
+		Arrays.sort(source);
+		double median;
+		if ((source.length % 2) != 0) {
+			median = ((double) source[source.length / 2] + (double) source[source.length / 2 + 1]) / 2;
+		} else {
+			median = (double) source[source.length / 2];
+		}
+		return median;
 	}
 }

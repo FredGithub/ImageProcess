@@ -51,6 +51,9 @@ public class Image {
 	}
 
 	public int getRed(int x, int y) {
+		// if the pixel is outside of the image give the one of the border
+		x = Math.max(0, Math.min(mWidth - 1, x));
+		y = Math.max(0, Math.min(mHeight - 1, y));
 		return mRedChannel[x][y];
 	}
 
@@ -59,6 +62,9 @@ public class Image {
 	}
 
 	public int getGreen(int x, int y) {
+		// if the pixel is outside of the image give the one of the border
+		x = Math.max(0, Math.min(mWidth - 1, x));
+		y = Math.max(0, Math.min(mHeight - 1, y));
 		return mGreenChannel[x][y];
 	}
 
@@ -67,6 +73,9 @@ public class Image {
 	}
 
 	public int getBlue(int x, int y) {
+		// if the pixel is outside of the image give the one of the border
+		x = Math.max(0, Math.min(mWidth - 1, x));
+		y = Math.max(0, Math.min(mHeight - 1, y));
 		return mBlueChannel[x][y];
 	}
 
@@ -75,6 +84,9 @@ public class Image {
 	}
 
 	public int getGray(int x, int y) {
+		// if the pixel is outside of the image give the one of the border
+		x = Math.max(0, Math.min(mWidth - 1, x));
+		y = Math.max(0, Math.min(mHeight - 1, y));
 		return (int) (0.2126 * mRedChannel[x][y] + 0.7152 * mGreenChannel[x][y] + 0.0722 * mBlueChannel[x][y]);
 	}
 

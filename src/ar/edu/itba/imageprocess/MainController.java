@@ -180,14 +180,14 @@ public class MainController {
 	}
 
 	public void desaturate() {
-		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = new Image(mImagePaneSource.getImage().getGrayChannel());
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void displayHistogram() {
-		if (mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			int[] values = ArrayUtils.intArray2Dto1D(mImagePaneSource.getImage().getGrayChannel());
 			Image image = Filters.generateHistogramImage(values);
 			mImagePaneDest.setImageWithHistory(image);
@@ -248,7 +248,7 @@ public class MainController {
 	public int[] filterEqualize() {
 		Image image = mImagePaneSource.getImage();
 
-		//  let ni be the number of occurrences of gray level i
+		// let ni be the number of occurrences of gray level i
 		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
 
 		// cumulative frequency distribution
@@ -314,6 +314,27 @@ public class MainController {
 	public void displayExponentialChart(double param) {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateExponentialChartImage(param);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+	
+	public void applyPepperAndSalt(double p0, double p1) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyPepperAndSalt(mImagePaneSource.getImage(), p0, p1);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void applyFactorMaskFilter(int maskWidth, int maskHeight, int filterType) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyFactorMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight, filterType);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void applyMedianMaskFilter(int maskWidth, int maskHeight) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyMedianMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
