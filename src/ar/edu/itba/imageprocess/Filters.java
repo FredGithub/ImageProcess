@@ -61,7 +61,9 @@ public class Filters {
 
 	public static Image generateHistogramImage(int[] values) {
 		HistogramDataset dataset = new HistogramDataset();
-		dataset.addSeries("values", ArrayUtils.intArrayToDoubleArray(values), 256, 0, 255);
+		int lowBound = Math.min(0, ArrayUtils.min(values));
+		int highBound = Math.max(255, ArrayUtils.max(values));
+		dataset.addSeries("values", ArrayUtils.intArrayToDoubleArray(values), highBound - lowBound + 1, lowBound, highBound);
 		JFreeChart chart = ChartFactory.createHistogram("", "", "", dataset, PlotOrientation.VERTICAL, false, false, false);
 		return new Image(chart.createBufferedImage(400, 300));
 	}

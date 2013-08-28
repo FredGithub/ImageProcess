@@ -19,4 +19,48 @@ public class ArrayUtils {
 		}
 		return dest;
 	}
+
+	public static int max(int[] source) {
+		int max = source[0];
+		for (int i = 0; i < source.length; i++) {
+			if (max < source[i]) {
+				max = source[i];
+			}
+		}
+		return max;
+	}
+
+	public static int max(int[][] source) {
+		int max = source[0][0];
+		for (int i = 0; i < source.length; i++) {
+			for (int j = 0; j < source[0].length; j++) {
+				if (max < source[i][j]) {
+					max = source[i][j];
+				}
+			}
+		}
+		return max;
+	}
+
+	public static int min(int[] source) {
+		int min = source[0];
+		for (int i = 0; i < source.length; i++) {
+			if (min > source[i]) {
+				min = source[i];
+			}
+		}
+		return min;
+	}
+
+	public static int min(int[][] source) {
+		int min = source[0][0];
+		for (int i = 0; i < source.length; i++) {
+			for (int j = 0; j < source[0].length; j++) {
+				if (min > source[i][j]) {
+					min = source[i][j];
+				}
+			}
+		}
+		return min;
+	}
 }
