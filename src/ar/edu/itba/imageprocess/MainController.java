@@ -239,6 +239,64 @@ public class MainController {
 		}
 	}
 
+	/**
+	 * TP1-6 histogram equalization
+	 * 
+	 * http://www.mee.tcd.ie/~ack/teaching/1e8/histogram_equalisation_slides.pdf
+	 */
+
+	public int[] filterEqualize() {
+		Image image = mImagePaneSource.getImage();
+
+		//  let ni be the number of occurrences of gray level i
+		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
+
+		// cumulative frequency distribution
+		int[] cuf = new int[ni.length];
+		cuf[0] = ni[0];
+		for (int i = 1; i < cuf.length; i++) {
+			cuf[i] = cuf[i - 1] + ni[i];
+		}
+
+		int[] cuFeq = new int[ni.length];
+		for (int i = 0; i < cuFeq.length; i++) {
+			cuFeq[i] = (int) (i * cuf[cuf.length - 1] / cuf.length);
+		}
+
+		int[] output = new int[ni.length];
+		for (int i = 0; i < ni.length; i++) {
+			output[i] = equalize(cuf[i], cuFeq);
+		}
+
+		int[][] pic = new int[image.getWidth()][image.getHeight()];
+
+		for (int x = 0; x < image.getWidth(); x++) {
+			for (int y = 0; y < image.getHeight(); y++) {
+				pic[x][y] = (int) (output[image.getGray(x, y)]);
+			}
+		}
+
+		mImagePaneDest.setImageWithHistory(new Image(pic));
+		return null;
+	}
+
+	/**
+	 * Used to find the correct output value for the equalization
+	 * 
+	 * @return
+	 */
+	private int equalize(int n, int[] cuFeq) {
+		int min = Math.abs(n - cuFeq[0]);
+		int minindex = 0;
+		for (int i = 1; i < cuFeq.length; i++) {
+			if (Math.abs(n - cuFeq[i]) < min) {
+				min = Math.abs(n - cuFeq[i]);
+				minindex = i;
+			}
+		}
+		return minindex;
+	}
+
 	public void displayGaussianChart(double spread, double average) {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateGaussianChartImage(spread, average);
