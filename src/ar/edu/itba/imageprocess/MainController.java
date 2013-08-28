@@ -236,44 +236,32 @@ public class MainController {
 	/**
 	 * TP1-6
 	 * histogram equalization
+	 * 
+	 * http://www.mee.tcd.ie/~ack/teaching/1e8/histogram_equalisation_slides.pdf
 	 */
 
 	public int[] filterEqualize() {
 		Image image = mImagePaneSource.getImage();		
-		// rk es el k-ésimo nivel de gris que vara en el intervalo [0; L-1].
-		
-		
+	
 		//  let ni be the number of occurrences of gray level i
 		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
 		
-		// n is the total number of pixels in the image
-		int n = image.getWidth()*image.getHeight();
-		
-		// px is the probability of an occurrence of a pixel of level i in the image
-		// px is the image's histogram for pixel value i, normalized to [0,1]
-		// cdfx is the cdf corresponding to px and the image's accumulated normalized histogram.
-		double[] px = new double[ni.length];
-		for (int i=0; i<px.length; i++) {
-			px[i] = ni[i]/n;
-		}
-		
-		int[] cdfx = new int[ni.length];
-		cdfx[0] = ni[0];
-		for (int i=1; i<cdfx.length; i++) {
-			cdfx[i] = cdfx[i-1]+ni[i];
+		// cumulative frequency distribution
+		int[] cuf = new int[ni.length];
+		cuf[0] = ni[0];
+		for (int i=1; i<cuf.length; i++) {
+			cuf[i] = cuf[i-1]+ni[i];
 		}
 		
 		int[] cuFeq = new int[ni.length];
 		for (int i=0; i<cuFeq.length; i++) {
-			cuFeq[i] = (int)(cdfx[i]/cdfx.length);
+			cuFeq[i] = (int)(i*cuf[cuf.length-1]/cuf.length);
 		}
-		
+
 		int[] output = new int[ni.length];
 		for (int i=0; i<ni.length; i++) {
-			output[i] = blabb(i, cuFeq);
-			System.out.println(i + ", " + blabb(i, cuFeq) + ", " + ni[i]);
+			output[i] = equalize(cuf[i], cuFeq);
 		} 
-		
 		
 		int[][] pic = new int[image.getWidth()][image.getHeight()];
 		
@@ -287,8 +275,11 @@ public class MainController {
 		return null;
 	}
 	
-
-	private int blabb(int n, int[] cuFeq) {
+	/**
+	 * Used to find the correct output value for the equalization
+	 * @return
+	 */
+	private int equalize(int n, int[] cuFeq) {
 		int min = Math.abs(n-cuFeq[0]);
 		int minindex = 0;
 		for (int i=1; i<cuFeq.length; i++) {
@@ -298,25 +289,5 @@ public class MainController {
 			}
 		}
 		return minindex;
-	}
-
-	private double min(double[] px) {
-		double min = px[0];
-		for (double i : px) {
-			if (i < min) {
-				min = i;
-			}
-		}
-		return min;
-	}
-	
-	private int max(int[] arr) {
-		int max = arr[0];
-		for (int i : arr) {
-			if (i > max) {
-				max = i;
-			}
-		}
-		return max;
 	}
 }
