@@ -94,6 +94,32 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image subtractImages(Image image1, Image image2) {
+		// images must be the same size
+		if (image1.getWidth() != image2.getWidth() || image1.getHeight() != image2.getHeight()) {
+			Log.d("images must be the same size");
+			return null;
+		}
+
+		// prepare the new image channel arrays
+		int width = image1.getWidth();
+		int height = image1.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// subtract each pixel one by one
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				redChannel[x][y] = image1.getRed(x, y) - image2.getRed(x, y);
+				greenChannel[x][y] = image1.getGreen(x, y) - image2.getGreen(x, y);
+				blueChannel[x][y] = image1.getBlue(x, y) - image2.getBlue(x, y);
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
 	public static Image compress(Image image) {
 		int[][] grayChannel = image.getGrayChannel();
 		int[][] newGrayChannel = new int[image.getWidth()][image.getHeight()];
@@ -111,6 +137,8 @@ public class Filters {
 				} else {
 					newGrayChannel[x][y] = grayChannel[x][y];
 				}
+				// now apply a simple trim if the gray level is under 0
+				newGrayChannel[x][y] = Math.max(0, newGrayChannel[x][y]);
 			}
 		}
 
