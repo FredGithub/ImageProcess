@@ -6,15 +6,14 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import ar.edu.itba.imageprocess.ParamAsker.Param;
 import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.ImageFilter;
 import ar.edu.itba.imageprocess.utils.Log;
@@ -235,13 +234,29 @@ public class MenuPane extends JPanel implements ActionListener {
 
 	private void loadImage() {
 		int returnVal = mFileChooser.showOpenDialog(this);
+
+		// if the user selected a file
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = mFileChooser.getSelectedFile();
+
+			// if the file is a raw file, we need to ask the image size
 			if (FileUtils.getFileExtension(file).equals("raw")) {
-				ArrayList<Integer> dimensions = askImageDimension(file);
-				Log.d("dimensions: " + dimensions);
-				if (dimensions != null) {
-					mController.loadImage(file, dimensions.get(0), dimensions.get(1));
+				int[] defaultSize = mDefaultDimensions.get(file.getName());
+				ParamAsker params = new ParamAsker();
+				// if the default size exists for that file
+				if (defaultSize != null) {
+					params.addParam(new Param(Param.TYPE_INTEGER, "width", 0, 5000, String.valueOf(defaultSize[0])));
+					params.addParam(new Param(Param.TYPE_INTEGER, "height", 0, 5000, String.valueOf(defaultSize[1])));
+				} else {
+					params.addParam(new Param(Param.TYPE_INTEGER, "width", 0, 5000));
+					params.addParam(new Param(Param.TYPE_INTEGER, "height", 0, 5000));
+				}
+				// if the user enters all the parameters
+				if (params.ask()) {
+					int width = params.getParam("width").getValueInt();
+					int height = params.getParam("height").getValueInt();
+					Log.d("dimensions: " + width + ", " + height);
+					mController.loadImage(file, width, height);
 				}
 			} else {
 				mController.loadImage(file, 0, 0);
@@ -255,37 +270,5 @@ public class MenuPane extends JPanel implements ActionListener {
 			File file = mFileChooser.getSelectedFile();
 			mController.saveImage(file);
 		}
-	}
-
-	private ArrayList<Integer> askImageDimension(File file) {
-		String[] messages = new String[] { "Image width:", "Image height:" };
-		String message = messages[0];
-		ArrayList<Integer> dimensions = new ArrayList<Integer>();
-
-		while (dimensions.size() != messages.length) {
-			String input;
-			if (mDefaultDimensions.containsKey(file.getName())) {
-				input = JOptionPane.showInputDialog(message, mDefaultDimensions.get(file.getName())[dimensions.size()]);
-			} else {
-				input = JOptionPane.showInputDialog(message);
-			}
-			if (input == null) {
-				return null;
-			}
-			try {
-				int dim = Integer.parseInt(input);
-				if (dim <= 0) {
-					message = "Invalid input. " + messages[dimensions.size()];
-				} else {
-					dimensions.add(dim);
-					if (dimensions.size() < messages.length) {
-						message = messages[dimensions.size()];
-					}
-				}
-			} catch (NumberFormatException e) {
-				message = "Invalid input. " + messages[dimensions.size()];
-			}
-		}
-		return dimensions;
 	}
 }
