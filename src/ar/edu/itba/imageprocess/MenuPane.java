@@ -60,6 +60,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mGaussianTest;
 	private JButton mRayleighTest;
 	private JButton mExponentialTest;
+	private JButton mApplyAddGaussian;
+	private JButton mApplyMulRayleigh;
+	private JButton mApplyMulExponential;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -184,6 +187,21 @@ public class MenuPane extends JPanel implements ActionListener {
 		mExponentialTest = new JButton("Exponential test");
 		mExponentialTest.addActionListener(this);
 		menuNoise.add(mExponentialTest);
+		
+		mApplyAddGaussian = new JButton("Add Gaussian");
+		mApplyAddGaussian.addActionListener(this);
+		menuNoise.add(mApplyAddGaussian);
+		
+		mApplyMulRayleigh = new JButton("Mul Rayleigh");
+		mApplyMulRayleigh.addActionListener(this);
+		menuNoise.add(mApplyMulRayleigh);
+		
+		mApplyMulExponential = new JButton("Mul Exponential");
+		mApplyMulExponential.addActionListener(this);
+		menuNoise.add(mApplyMulExponential);
+		
+		
+		
 	}
 
 	@Override
@@ -230,6 +248,12 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mExponentialTest) {
 			// TODO make this choosable
 			mController.displayExponentialChart(0.5);
+		} else if (e.getSource() == mApplyAddGaussian) {
+			mController.applyAddGaussianNoise();
+		} else if (e.getSource() == mApplyMulRayleigh) {
+			mController.applyMulRayleighNoise();
+		} else if (e.getSource() == mApplyMulExponential) {
+			mController.applyMulExponentialNoise();
 		}
 	}
 
