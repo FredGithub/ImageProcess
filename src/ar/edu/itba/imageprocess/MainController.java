@@ -168,8 +168,9 @@ public class MainController {
 	}
 
 	public void compress() {
-		if (mImagePaneDest != null) {
-
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.compress(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 

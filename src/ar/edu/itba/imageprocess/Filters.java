@@ -93,4 +93,27 @@ public class Filters {
 
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
+
+	public static Image compress(Image image) {
+		int[][] grayChannel = image.getGrayChannel();
+		int[][] newGrayChannel = new int[image.getWidth()][image.getHeight()];
+
+		// get the maximum gray level and the factor of compression
+		int max = ArrayUtils.max(grayChannel);
+		double c = 255 / Math.log(max);
+
+		// apply the filter to all pixels
+		for (int x = 0; x < image.getWidth(); x++) {
+			for (int y = 0; y < image.getHeight(); y++) {
+				// only apply the filter if the max gray level is above 255
+				if (max > 255) {
+					newGrayChannel[x][y] = (int) (c * Math.log(grayChannel[x][y] + 1));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
 }
