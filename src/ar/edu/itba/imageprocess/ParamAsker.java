@@ -21,6 +21,18 @@ public class ParamAsker {
 		return mParams.get(name);
 	}
 
+	public String getString(String name) {
+		return mParams.get(name).getValue();
+	}
+
+	public int getInteger(String name) {
+		return mParams.get(name).getValueInt();
+	}
+
+	public double getDouble(String name) {
+		return mParams.get(name).getValueDouble();
+	}
+
 	/**
 	 * Adds a param to the ParamAsker
 	 */

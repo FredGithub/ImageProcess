@@ -206,8 +206,11 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mSubtractImages) {
 			mController.subtractImages();
 		} else if (e.getSource() == mMultiplyScalar) {
-			// TODO make this choosable
-			mController.multiplyScalar(1.5);
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "scalar", "1.5"));
+			if (params.ask()) {
+				mController.multiplyScalar(params.getDouble("scalar"));
+			}
 		} else if (e.getSource() == mCompression) {
 			mController.compress();
 		} else if (e.getSource() == mFilterNegative) {
@@ -221,14 +224,24 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
 		} else if (e.getSource() == mGaussianTest) {
-			// TODO make this choosable
-			mController.displayGaussianChart(1, 0);
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "1"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "0"));
+			if (params.ask()) {
+				mController.displayGaussianChart(params.getDouble("spread"), params.getDouble("average"));
+			}
 		} else if (e.getSource() == mRayleighTest) {
-			// TODO make this choosable
-			mController.displayRayleighChart(0.5);
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			if (params.ask()) {
+				mController.displayRayleighChart(params.getDouble("param"));
+			}
 		} else if (e.getSource() == mExponentialTest) {
-			// TODO make this choosable
-			mController.displayExponentialChart(0.5);
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			if (params.ask()) {
+				mController.displayExponentialChart(params.getDouble("param"));
+			}
 		}
 	}
 
@@ -253,8 +266,8 @@ public class MenuPane extends JPanel implements ActionListener {
 				}
 				// if the user enters all the parameters
 				if (params.ask()) {
-					int width = params.getParam("width").getValueInt();
-					int height = params.getParam("height").getValueInt();
+					int width = params.getInteger("width");
+					int height = params.getInteger("height");
 					Log.d("dimensions: " + width + ", " + height);
 					mController.loadImage(file, width, height);
 				}
