@@ -19,16 +19,16 @@ public class Filters {
 
 	public static Image generateWhiteImage(int width, int height) {
 		int[][] grayChannel = new int[width][height];
-		for(int x=0; x<width; x++){
-			for(int y=0; y<width; y++){
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < width; y++) {
 				grayChannel[x][y] = 255;
 			}
 		}
 		return new Image(grayChannel);
 	}
-	
+
 	public static Image generateCircle(int radius, int imageSize) {
-		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = bufferedImage.createGraphics();
 		g2d.setColor(Color.WHITE);
 		g2d.fill(new Ellipse2D.Double(imageSize / 2 - radius / 2, imageSize / 2 - radius / 2, radius, radius));
@@ -36,7 +36,7 @@ public class Filters {
 	}
 
 	public static Image generateSquare(int size, int imageSize) {
-		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = bufferedImage.createGraphics();
 		g2d.setColor(Color.WHITE);
 		g2d.fill(new Rectangle2D.Double(imageSize / 2 - size / 2, imageSize / 2 - size / 2, size, size));
@@ -44,7 +44,7 @@ public class Filters {
 	}
 
 	public static Image generateGradient(int imageSize) {
-		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2d = bufferedImage.createGraphics();
 		g2d.setPaint(new GradientPaint(0, 0, Color.GRAY, imageSize, 0, Color.WHITE));
 		g2d.fill(new Rectangle2D.Double(0, 0, imageSize, imageSize));
@@ -65,34 +65,30 @@ public class Filters {
 		JFreeChart chart = ChartFactory.createHistogram("", "", "", dataset, PlotOrientation.VERTICAL, false, false, false);
 		return new Image(chart.createBufferedImage(400, 300));
 	}
-	
-	/**
-	 * Warning! This function will take the type (gray or RGB) of image1
-	 * So if 
-	 */
-	public static Image addImages(Image image1, Image image2){
+
+	public static Image addImages(Image image1, Image image2) {
 		// images must be the same size
-		if(image1.getWidth() != image2.getWidth() || image1.getHeight() != image2.getHeight()){
+		if (image1.getWidth() != image2.getWidth() || image1.getHeight() != image2.getHeight()) {
 			Log.d("images must be the same size");
 			return null;
 		}
-		
+
 		// prepare the new image channel arrays
 		int width = image1.getWidth();
 		int height = image1.getHeight();
 		int[][] redChannel = new int[width][height];
 		int[][] greenChannel = new int[width][height];
 		int[][] blueChannel = new int[width][height];
-		
+
 		// add each pixel one by one
-		for(int x=0; x<width; x++){
-			for(int y=0; y<height; y++){
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				redChannel[x][y] = image1.getRed(x, y) + image2.getRed(x, y);
 				greenChannel[x][y] = image1.getGreen(x, y) + image2.getGreen(x, y);
 				blueChannel[x][y] = image1.getBlue(x, y) + image2.getBlue(x, y);
 			}
 		}
-		
-		return new Image(redChannel, greenChannel, blueChannel, image1.getBufferedImage().getType());
+
+		return new Image(redChannel, greenChannel, blueChannel);
 	}
 }

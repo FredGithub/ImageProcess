@@ -64,18 +64,22 @@ public class MainController {
 			Log.d("opening " + file.getName());
 			try {
 				String extension = FileUtils.getFileExtension(file);
-				BufferedImage image = null;
+				Image image = null;
 				if (extension.equals("raw")) {
-					image = ExtImageIO.readRaw(file, width, height);
+					image = new Image(ExtImageIO.readRawImageChannel(file, width, height));
 				} else if (extension.equals("pgm")) {
-					image = ExtImageIO.readPgm(file);
+					image = new Image(ExtImageIO.readPgmImageChannel(file));
 				} else if (extension.equals("ppm")) {
-					image = ExtImageIO.readPpm(file);
+					int[][][] channels = ExtImageIO.readPpmImageChannels(file);
+					image = new Image(channels[0], channels[1], channels[2]);
 				} else {
-					image = ImageIO.read(file);
+					BufferedImage bufferedImage = ImageIO.read(file);
+					if(bufferedImage != null){
+						image = new Image(bufferedImage);
+					}
 				}
 				if (image != null) {
-					mImagePaneDest.setImageWithHistory(new Image(image));
+					mImagePaneDest.setImageWithHistory(image);
 					repaintMainFrame();
 				} else {
 					Log.d("couldn't load image " + file.getName());
@@ -112,7 +116,7 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
-	
+
 	public void generateCircle() {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateCircle(92, 256);
@@ -145,7 +149,7 @@ public class MainController {
 		ImagePane[] imagePanes = mMainFrame.getImagePanes();
 		if (mImagePaneDest != null && imagePanes[0].getImage() != null && imagePanes[1].getImage() != null) {
 			Image image = Filters.addImages(imagePanes[0].getImage(), imagePanes[1].getImage());
-			if(image != null){
+			if (image != null) {
 				mImagePaneDest.setImageWithHistory(image);
 			}
 		}
@@ -153,19 +157,19 @@ public class MainController {
 
 	public void subtractImages() {
 		if (mImagePaneDest != null) {
-			
+
 		}
 	}
 
 	public void multiplyScalar() {
 		if (mImagePaneDest != null) {
-			
+
 		}
 	}
 
 	public void compress() {
 		if (mImagePaneDest != null) {
-			
+
 		}
 	}
 
@@ -183,10 +187,9 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
-	
+
 	/**
-	 * TP1-2
-	 * Creates a negative of the image.
+	 * TP1-2 Creates a negative of the image.
 	 */
 	public void filterNegative() {
 		if (mImagePaneDest != null && mImagePaneSource.getImage() != null) {
@@ -194,10 +197,10 @@ public class MainController {
 			int width = image.getWidth();
 			int height = image.getHeight();
 			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
-			
-			for (int i=0; i<image.getWidth(); i++) {
-				for (int j=0; j<image.getHeight(); j++) {
-					imageDest.setRGB(i, j, 0xFFFFFF-image.getRGB(i, j));
+
+			for (int i = 0; i < image.getWidth(); i++) {
+				for (int j = 0; j < image.getHeight(); j++) {
+					imageDest.setRGB(i, j, 0xFFFFFF - image.getRGB(i, j));
 				}
 			}
 			mImagePaneDest.setImageWithHistory(new Image(imageDest));
@@ -205,8 +208,7 @@ public class MainController {
 	}
 
 	/**
-	 * TP1-5
-	 * Creates a threshold version of the image.
+	 * TP1-5 Creates a threshold version of the image.
 	 */
 	public void filterThreshold() {
 		if (mImagePaneDest != null) {
@@ -214,20 +216,20 @@ public class MainController {
 			int width = image.getWidth();
 			int height = image.getHeight();
 			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
-			
+
 			// TODO - Make sure that you can set the threshold yourself
 			int threshold = 0x888888;
-			for (int i=0; i<image.getWidth(); i++) {
-				for (int j=0; j<image.getHeight(); j++) {
-					if(image.getRGB(i, j) < threshold) {
+			for (int i = 0; i < image.getWidth(); i++) {
+				for (int j = 0; j < image.getHeight(); j++) {
+					if (image.getRGB(i, j) < threshold) {
 						imageDest.setRGB(i, j, 0x000000);
 					} else {
 						imageDest.setRGB(i, j, 0xFFFFFF);
 					}
 				}
 			}
-			
+
 			mImagePaneDest.setImageWithHistory(new Image(imageDest));
-		}		
+		}
 	}
 }
