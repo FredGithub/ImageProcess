@@ -7,15 +7,15 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.statistics.HistogramDataset;
-
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
+import ar.edu.itba.imageprocess.utils.ChartUtils;
 import ar.edu.itba.imageprocess.utils.Log;
+import ar.edu.itba.imageprocess.utils.RandGenerator;
 
 public class Filters {
+
+	public static final int CHART_WIDTH = 400;
+	public static final int CHART_HEIGHT = 300;
 
 	public static Image generateWhiteImage(int width, int height) {
 		int[][] grayChannel = new int[width][height];
@@ -60,12 +60,9 @@ public class Filters {
 	}
 
 	public static Image generateHistogramImage(int[] values) {
-		HistogramDataset dataset = new HistogramDataset();
 		int lowBound = Math.min(0, ArrayUtils.min(values));
 		int highBound = Math.max(255, ArrayUtils.max(values));
-		dataset.addSeries("values", ArrayUtils.intArrayToDoubleArray(values), highBound - lowBound + 1, lowBound, highBound);
-		JFreeChart chart = ChartFactory.createHistogram("", "", "", dataset, PlotOrientation.VERTICAL, false, false, false);
-		return new Image(chart.createBufferedImage(400, 300));
+		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, ArrayUtils.intArrayToDoubleArray(values), highBound - lowBound + 1, lowBound, highBound));
 	}
 
 	public static Image addImages(Image image1, Image image2) {
@@ -163,5 +160,35 @@ public class Filters {
 		}
 
 		return new Image(newGrayChannel);
+	}
+
+	public static Image generateGaussianChartImage(double spread, double average) {
+		// generate test data and create a chart out of it
+		int size = 5000;
+		double data[] = new double[size];
+		for (int i = 0; i < size; i++) {
+			data[i] = RandGenerator.gaussian(spread, average);
+		}
+		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, data, 100));
+	}
+
+	public static Image generateRayleighChartImage(double param) {
+		// generate test data and create a chart out of it
+		int size = 5000;
+		double data[] = new double[size];
+		for (int i = 0; i < size; i++) {
+			data[i] = RandGenerator.rayleigh(param);
+		}
+		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, data, 100));
+	}
+
+	public static Image generateExponentialChartImage(double param) {
+		// generate test data and create a chart out of it
+		int size = 5000;
+		double data[] = new double[size];
+		for (int i = 0; i < size; i++) {
+			data[i] = RandGenerator.exponential(param);
+		}
+		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, data, 100));
 	}
 }

@@ -47,7 +47,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mSubtractImages;
 	private JButton mMultiplyScalar;
 	private JButton mCompression;
-	
+
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
 
@@ -56,6 +56,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mHistogramBtn;
 
 	// noise and blur menu
+	private JButton mGaussianTest;
+	private JButton mRayleighTest;
+	private JButton mExponentialTest;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -101,7 +104,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		mGenerateWhite = new JButton("White");
 		mGenerateWhite.addActionListener(this);
 		menuShape.add(mGenerateWhite);
-		
+
 		mGenerateCircleBtn = new JButton("Circle");
 		mGenerateCircleBtn.addActionListener(this);
 		menuShape.add(mGenerateCircleBtn);
@@ -117,35 +120,35 @@ public class MenuPane extends JPanel implements ActionListener {
 		mGenerateColorGradientBtn = new JButton("Color gradient");
 		mGenerateColorGradientBtn.addActionListener(this);
 		menuShape.add(mGenerateColorGradientBtn);
-		
+
 		mAddImages = new JButton("Add");
 		mAddImages.addActionListener(this);
 		menuShape.add(mAddImages);
-		
+
 		mSubtractImages = new JButton("Subtract");
 		mSubtractImages.addActionListener(this);
 		menuShape.add(mSubtractImages);
-		
+
 		mMultiplyScalar = new JButton("Multiply");
 		mMultiplyScalar.addActionListener(this);
 		menuShape.add(mMultiplyScalar);
-		
+
 		mCompression = new JButton("Compression");
 		mCompression.addActionListener(this);
 		menuShape.add(mCompression);
-		
-		// file menu
 
-		JPanel menu3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Filter", menu3);
-		
+		// filter menu
+
+		JPanel menuFilter = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Filter", menuFilter);
+
 		mFilterNegative = new JButton("Negative");
 		mFilterNegative.addActionListener(this);
-		menu3.add(mFilterNegative);
+		menuFilter.add(mFilterNegative);
 
 		mFilterThreshold = new JButton("Threshold");
 		mFilterThreshold.addActionListener(this);
-		menu3.add(mFilterThreshold);
+		menuFilter.add(mFilterThreshold);
 
 		// histogram menu
 
@@ -164,6 +167,18 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		JPanel menuNoise = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		tabbedPane.addTab("Noise and blur", menuNoise);
+
+		mGaussianTest = new JButton("Gaussian test");
+		mGaussianTest.addActionListener(this);
+		menuNoise.add(mGaussianTest);
+
+		mRayleighTest = new JButton("Rayleigh test");
+		mRayleighTest.addActionListener(this);
+		menuNoise.add(mRayleighTest);
+
+		mExponentialTest = new JButton("Exponential test");
+		mExponentialTest.addActionListener(this);
+		menuNoise.add(mExponentialTest);
 	}
 
 	@Override
@@ -199,6 +214,15 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.displayHistogram();
 		} else if (e.getSource() == mDesaturateBtn) {
 			mController.desaturate();
+		} else if (e.getSource() == mGaussianTest) {
+			// TODO make this choosable
+			mController.displayGaussianChart(1, 0);
+		} else if (e.getSource() == mRayleighTest) {
+			// TODO make this choosable
+			mController.displayRayleighChart(0.5);
+		} else if (e.getSource() == mExponentialTest) {
+			// TODO make this choosable
+			mController.displayExponentialChart(0.5);
 		}
 	}
 

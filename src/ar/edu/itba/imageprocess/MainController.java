@@ -74,7 +74,7 @@ public class MainController {
 					image = new Image(channels[0], channels[1], channels[2]);
 				} else {
 					BufferedImage bufferedImage = ImageIO.read(file);
-					if(bufferedImage != null){
+					if (bufferedImage != null) {
 						image = new Image(bufferedImage);
 					}
 				}
@@ -236,6 +236,27 @@ public class MainController {
 			}
 
 			mImagePaneDest.setImageWithHistory(new Image(imageDest));
+		}
+	}
+
+	public void displayGaussianChart(double spread, double average) {
+		if (mImagePaneDest != null) {
+			Image image = Filters.generateGaussianChartImage(spread, average);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void displayRayleighChart(double param) {
+		if (mImagePaneDest != null) {
+			Image image = Filters.generateRayleighChartImage(param);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void displayExponentialChart(double param) {
+		if (mImagePaneDest != null) {
+			Image image = Filters.generateExponentialChartImage(param);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 }
