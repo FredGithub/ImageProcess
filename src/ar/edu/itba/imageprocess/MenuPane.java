@@ -52,6 +52,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mFilterThreshold;
 	private JButton mHistogramBtn;
 	private JButton mDesaturateBtn;
+	private JButton mContrastBtn;
 	private JButton mEqualizeBtn;
 
 	// noise and mask menu
@@ -163,9 +164,13 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHistogramBtn.addActionListener(this);
 		menuHistogram.add(mHistogramBtn);
 
-		mDesaturateBtn = new JButton("Desaturate");
+		mDesaturateBtn = new JButton("Black and white");
 		mDesaturateBtn.addActionListener(this);
 		menuHistogram.add(mDesaturateBtn);
+
+		mContrastBtn = new JButton("Linear contrast");
+		mContrastBtn.addActionListener(this);
+		menuHistogram.add(mContrastBtn);
 
 		mEqualizeBtn = new JButton("Equalize");
 		mEqualizeBtn.addActionListener(this);
@@ -266,26 +271,38 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.displayHistogram();
 		} else if (e.getSource() == mDesaturateBtn) {
 			mController.desaturate();
+		} else if (e.getSource() == mContrastBtn) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "r1", 0, 255, "80"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "r2", 0, 255, "180"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "s1", 0, 255, "40"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "s2", 0, 255, "220"));
+			if (params.ask()) {
+				mController.filterContrast(params.getInteger("r1"), params.getInteger("r2"), params.getInteger("s1"), params.getInteger("s2"));
+			}
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
 		} else if (e.getSource() == mApplyAddGaussian) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "5"));
 			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "10"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyAddGaussianNoise(params.getDouble("spread"), params.getDouble("average"));
+				mController.applyAddGaussianNoise(params.getDouble("spread"), params.getDouble("average"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mApplyMulRayleigh) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyMulRayleighNoise(params.getDouble("p"));
+				mController.applyMulRayleighNoise(params.getDouble("p"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mApplyMulExponential) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyMulExponentialNoise(params.getDouble("p"));
+				mController.applyMulExponentialNoise(params.getDouble("p"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mPepperAndSalt) {
 			ParamAsker params = new ParamAsker();

@@ -205,6 +205,37 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image filterContrast(Image image, int r1, int r2, int s1, int s2) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = new int[width][height];
+
+		// calculate the three linear transforms parameters
+		double factor1 = (double) (s1 - 0) / (r1 - 0);
+		double b1 = 0;
+		double factor2 = (double) (s2 - s1) / (r2 - r1);
+		double b2 = -factor2 * r1 + s1;
+		double factor3 = (double) (255 - s2) / (255 - r2);
+		double b3 = -factor3 * r2 + s2;
+
+		// apply the transforms to each pixels
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gray = image.getGray(x, y);
+				if (gray <= r1) {
+					grayChannel[x][y] = (int) (gray * factor1 + b1);
+				} else if (gray <= r2) {
+					grayChannel[x][y] = (int) (gray * factor2 + b2);
+				} else {
+					grayChannel[x][y] = (int) (gray * factor3 + b3);
+				}
+			}
+		}
+
+		return new Image(grayChannel);
+	}
+
 	public static Image filterEqualize(Image image) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
@@ -240,7 +271,7 @@ public class Filters {
 		return new Image(grayChannel);
 	}
 
-	public static Image applyAddGaussianNoise(Image image, double spread, double average) {
+	public static Image applyAddGaussianNoise(Image image, double spread, double average, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -250,14 +281,19 @@ public class Filters {
 		// apply the gaussian noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 
 		return new Image(newGrayChannel);
 	}
 
-	public static Image applyMulRayleighNoise(Image image, double p) {
+	public static Image applyMulRayleighNoise(Image image, double p, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -267,14 +303,19 @@ public class Filters {
 		// apply the rayleigh noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 
 		return new Image(newGrayChannel);
 	}
 
-	public static Image applyMulExponentialNoise(Image image, double p) {
+	public static Image applyMulExponentialNoise(Image image, double p, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -284,7 +325,12 @@ public class Filters {
 		// apply the exponential noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 

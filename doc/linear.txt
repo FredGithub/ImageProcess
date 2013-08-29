@@ -1,0 +1,25 @@
+y = a*x + b
+
+
+b1
+at 0, y = 0
+
+0 = factor1*0 + b
+
+b = -factor1*0 + 0
+
+
+b2
+at r1, y = s1
+
+s1 = factor2*r1 + b
+
+b = -factor2*r1 + s1
+
+
+b3
+at r2, y = s2
+
+s2 = factor3*r2 + b
+
+b = -factor3*r2 + s2
