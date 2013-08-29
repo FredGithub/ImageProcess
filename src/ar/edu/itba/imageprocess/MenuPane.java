@@ -56,14 +56,19 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mEqualizeBtn;
 
 	// noise and mask menu
-	private JButton mGaussianTest;
-	private JButton mRayleighTest;
-	private JButton mExponentialTest;
+	private JButton mApplyAddGaussian;
+	private JButton mApplyMulRayleigh;
+	private JButton mApplyMulExponential;
 	private JButton mPepperAndSalt;
 	private JButton mMaskAverage;
 	private JButton mMaskGaussian;
 	private JButton mMaskHighPass;
 	private JButton mMaskMedian;
+
+	// test menu
+	private JButton mGaussianTest;
+	private JButton mRayleighTest;
+	private JButton mExponentialTest;
 
 	public MenuPane(MainController controller) {
 		super(new GridBagLayout());
@@ -175,19 +180,19 @@ public class MenuPane extends JPanel implements ActionListener {
 		// noise and mask menu
 
 		JPanel menuNoise = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Noise and blur", menuNoise);
+		tabbedPane.addTab("Noise and mask", menuNoise);
 
-		mGaussianTest = new JButton("Gaussian test");
-		mGaussianTest.addActionListener(this);
-		menuNoise.add(mGaussianTest);
+		mApplyAddGaussian = new JButton("Add Gaussian");
+		mApplyAddGaussian.addActionListener(this);
+		menuNoise.add(mApplyAddGaussian);
 
-		mRayleighTest = new JButton("Rayleigh test");
-		mRayleighTest.addActionListener(this);
-		menuNoise.add(mRayleighTest);
+		mApplyMulRayleigh = new JButton("Mul Rayleigh");
+		mApplyMulRayleigh.addActionListener(this);
+		menuNoise.add(mApplyMulRayleigh);
 
-		mExponentialTest = new JButton("Exponential test");
-		mExponentialTest.addActionListener(this);
-		menuNoise.add(mExponentialTest);
+		mApplyMulExponential = new JButton("Mul Exponential");
+		mApplyMulExponential.addActionListener(this);
+		menuNoise.add(mApplyMulExponential);
 
 		mPepperAndSalt = new JButton("Pepper and salt");
 		mPepperAndSalt.addActionListener(this);
@@ -208,6 +213,23 @@ public class MenuPane extends JPanel implements ActionListener {
 		mMaskMedian = new JButton("Median mask");
 		mMaskMedian.addActionListener(this);
 		menuNoise.add(mMaskMedian);
+
+		// noise and mask menu
+
+		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Tests", menuNoise);
+
+		mGaussianTest = new JButton("Gaussian test");
+		mGaussianTest.addActionListener(this);
+		menuTest.add(mGaussianTest);
+
+		mRayleighTest = new JButton("Rayleigh test");
+		mRayleighTest.addActionListener(this);
+		menuTest.add(mRayleighTest);
+
+		mExponentialTest = new JButton("Exponential test");
+		mExponentialTest.addActionListener(this);
+		menuTest.add(mExponentialTest);
 	}
 
 	@Override
@@ -248,25 +270,12 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.desaturate();
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
-		} else if (e.getSource() == mGaussianTest) {
-			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "1"));
-			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "0"));
-			if (params.ask()) {
-				mController.displayGaussianChart(params.getDouble("spread"), params.getDouble("average"));
-			}
-		} else if (e.getSource() == mRayleighTest) {
-			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
-			if (params.ask()) {
-				mController.displayRayleighChart(params.getDouble("param"));
-			}
-		} else if (e.getSource() == mExponentialTest) {
-			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
-			if (params.ask()) {
-				mController.displayExponentialChart(params.getDouble("param"));
-			}
+		} else if (e.getSource() == mApplyAddGaussian) {
+			mController.applyAddGaussianNoise();
+		} else if (e.getSource() == mApplyMulRayleigh) {
+			mController.applyMulRayleighNoise();
+		} else if (e.getSource() == mApplyMulExponential) {
+			mController.applyMulExponentialNoise();
 		} else if (e.getSource() == mPepperAndSalt) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p0", 0, 1, "0.02"));
@@ -301,6 +310,25 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
 			if (params.ask()) {
 				mController.applyMedianMaskFilter(params.getInteger("width"), params.getInteger("height"));
+			}
+		} else if (e.getSource() == mGaussianTest) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "1"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "0"));
+			if (params.ask()) {
+				mController.displayGaussianChart(params.getDouble("spread"), params.getDouble("average"));
+			}
+		} else if (e.getSource() == mRayleighTest) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			if (params.ask()) {
+				mController.displayRayleighChart(params.getDouble("param"));
+			}
+		} else if (e.getSource() == mExponentialTest) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			if (params.ask()) {
+				mController.displayExponentialChart(params.getDouble("param"));
 			}
 		}
 	}

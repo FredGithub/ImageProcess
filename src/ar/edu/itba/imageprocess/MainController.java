@@ -11,6 +11,7 @@ import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ExtImageIO;
 import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.Log;
+import ar.edu.itba.imageprocess.utils.RandGenerator;
 
 public class MainController {
 
@@ -297,6 +298,67 @@ public class MainController {
 		return minindex;
 	}
 
+	/**
+	 * adds gaussian blur to an image
+	 */
+	public void applyAddGaussianNoise() {
+		Image image = mImagePaneSource.getImage();
+		int[][] grayChannel = image.getGrayChannel();
+		int width = grayChannel.length;
+		int height = grayChannel[0].length;
+
+		int[][] newGrayChannel = new int[width][height];
+
+		// TODO - make these changeable
+		int spread = 5;
+		int average = 10;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++)
+				newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+		}
+
+		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
+	}
+
+	public void applyMulRayleighNoise() {
+		Image image = mImagePaneSource.getImage();
+		int[][] grayChannel = image.getGrayChannel();
+		int width = grayChannel.length;
+		int height = grayChannel[0].length;
+
+		int[][] newGrayChannel = new int[width][height];
+
+		// TODO - make this changeable
+		int p = 2;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++)
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+		}
+
+		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
+	}
+
+	public void applyMulExponentialNoise() {
+		Image image = mImagePaneSource.getImage();
+		int[][] grayChannel = image.getGrayChannel();
+		int width = grayChannel.length;
+		int height = grayChannel[0].length;
+
+		int[][] newGrayChannel = new int[width][height];
+
+		// TODO - make this changeable
+		int p = 2;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++)
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+		}
+
+		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
+	}
+
 	public void displayGaussianChart(double spread, double average) {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateGaussianChartImage(spread, average);
@@ -317,7 +379,7 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
-	
+
 	public void applyPepperAndSalt(double p0, double p1) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.applyPepperAndSalt(mImagePaneSource.getImage(), p0, p1);
