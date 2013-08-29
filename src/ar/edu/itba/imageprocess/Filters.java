@@ -140,17 +140,43 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static Image compress(Image image) {
+	public static Image compressLinear(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
 		int[][] grayChannel = image.getGrayChannel();
-		int[][] newGrayChannel = new int[image.getWidth()][image.getHeight()];
+		int[][] newGrayChannel = new int[width][height];
+
+		// get the bounds and calculate the linear transform parameters
+		int[] range = image.getRange(Image.CHANNEL_GRAY);
+		double factor = (double) 255 / (range[1] - range[0]);
+		double b = -factor * range[0];
+		Log.d("factor=" + factor + " b=" + b);
+
+		// apply the filter to all pixels
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * factor + b);
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image compress(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
+		int[][] newGrayChannel = new int[width][height];
 
 		// get the maximum gray level and the factor of compression
 		int max = ArrayUtils.max(grayChannel);
 		double c = 255 / Math.log(max);
 
 		// apply the filter to all pixels
-		for (int x = 0; x < image.getWidth(); x++) {
-			for (int y = 0; y < image.getHeight(); y++) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				// only apply the filter if the max gray level is above 255
 				if (max > 255) {
 					newGrayChannel[x][y] = (int) (c * Math.log(grayChannel[x][y] + 1));

@@ -132,14 +132,51 @@ public class Image {
 		return mBufferedImage;
 	}
 
+	/**
+	 * Calculates the histogram of the specified channel. The histogram size is
+	 * at least 256. If the image has pixels with a value higher than 255 or
+	 * lower than 0, the histogram will be bigger
+	 */
 	public int[] getHistogram(int channel) {
-		int[] histogram = new int[256];
+		// get the bounds
+		int[] bounds = getRange(channel);
+
+		// make sure the histogram size is at least 256
+		bounds[0] = Math.min(0, bounds[0]);
+		bounds[1] = Math.max(255, bounds[1]);
+
+		// get the size and prepare the histogram array
+		int size = bounds[1] - bounds[0] + 1;
+		int[] histogram = new int[size];
+
+		// fill the histogram
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
-				histogram[getChannelColor(x, y, channel)]++;
+				int index = getChannelColor(x, y, channel) + bounds[0];
+				histogram[index]++;
 			}
 		}
 		return histogram;
+	}
+
+	/**
+	 * Get the lower and the higher value of the channel
+	 * 
+	 * @return an array formed as [lowerValue, higherValue]
+	 */
+	public int[] getRange(int channel) {
+		int[] bounds = new int[] { getChannelColor(0, 0, channel), getChannelColor(0, 0, channel) };
+		for (int x = 0; x < mWidth; x++) {
+			for (int y = 0; y < mHeight; y++) {
+				if (bounds[0] > getChannelColor(x, y, channel)) {
+					bounds[0] = getChannelColor(x, y, channel);
+				}
+				if (bounds[1] < getChannelColor(x, y, channel)) {
+					bounds[1] = getChannelColor(x, y, channel);
+				}
+			}
+		}
+		return bounds;
 	}
 
 	public void drawBufferedImage(BufferedImage bufferedImage) {

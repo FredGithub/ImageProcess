@@ -172,6 +172,13 @@ public class MainController {
 		}
 	}
 
+	public void compressLinear() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.compressLinear(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void compress() {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.compress(mImagePaneSource.getImage());

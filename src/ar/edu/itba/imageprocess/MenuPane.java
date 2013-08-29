@@ -45,13 +45,14 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mAddImages;
 	private JButton mSubtractImages;
 	private JButton mMultiplyScalar;
+	private JButton mLinearCompression;
 	private JButton mCompression;
 
 	// histogram menu
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
 	private JButton mHistogramBtn;
-	private JButton mDesaturateBtn;
+	private JButton mBlackAndWhiteBtn;
 	private JButton mContrastBtn;
 	private JButton mEqualizeBtn;
 
@@ -143,6 +144,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mMultiplyScalar.addActionListener(this);
 		menuShape.add(mMultiplyScalar);
 
+		mLinearCompression = new JButton("Linear compression");
+		mLinearCompression.addActionListener(this);
+		menuShape.add(mLinearCompression);
+
 		mCompression = new JButton("Compression");
 		mCompression.addActionListener(this);
 		menuShape.add(mCompression);
@@ -164,9 +169,9 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHistogramBtn.addActionListener(this);
 		menuHistogram.add(mHistogramBtn);
 
-		mDesaturateBtn = new JButton("Black and white");
-		mDesaturateBtn.addActionListener(this);
-		menuHistogram.add(mDesaturateBtn);
+		mBlackAndWhiteBtn = new JButton("Black and white");
+		mBlackAndWhiteBtn.addActionListener(this);
+		menuHistogram.add(mBlackAndWhiteBtn);
 
 		mContrastBtn = new JButton("Linear contrast");
 		mContrastBtn.addActionListener(this);
@@ -257,6 +262,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.multiplyScalar(params.getDouble("scalar"));
 			}
+		} else if (e.getSource() == mLinearCompression) {
+			mController.compressLinear();
 		} else if (e.getSource() == mCompression) {
 			mController.compress();
 		} else if (e.getSource() == mFilterNegative) {
@@ -269,7 +276,7 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
-		} else if (e.getSource() == mDesaturateBtn) {
+		} else if (e.getSource() == mBlackAndWhiteBtn) {
 			mController.desaturate();
 		} else if (e.getSource() == mContrastBtn) {
 			ParamAsker params = new ParamAsker();
