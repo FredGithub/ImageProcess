@@ -47,12 +47,11 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mMultiplyScalar;
 	private JButton mCompression;
 
+	// histogram menu
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
-
-	// histogram menu
-	private JButton mDesaturateBtn;
 	private JButton mHistogramBtn;
+	private JButton mDesaturateBtn;
 	private JButton mEqualizeBtn;
 
 	// noise and mask menu
@@ -147,23 +146,18 @@ public class MenuPane extends JPanel implements ActionListener {
 		mCompression.addActionListener(this);
 		menuShape.add(mCompression);
 
-		// filter menu
-
-		JPanel menuFilter = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Filter", menuFilter);
-
-		mFilterNegative = new JButton("Negative");
-		mFilterNegative.addActionListener(this);
-		menuFilter.add(mFilterNegative);
-
-		mFilterThreshold = new JButton("Threshold");
-		mFilterThreshold.addActionListener(this);
-		menuFilter.add(mFilterThreshold);
-
 		// histogram menu
 
 		JPanel menuHistogram = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		tabbedPane.addTab("Histogram", menuHistogram);
+
+		mFilterNegative = new JButton("Negative");
+		mFilterNegative.addActionListener(this);
+		menuHistogram.add(mFilterNegative);
+
+		mFilterThreshold = new JButton("Threshold");
+		mFilterThreshold.addActionListener(this);
+		menuHistogram.add(mFilterThreshold);
 
 		mHistogramBtn = new JButton("Histogram");
 		mHistogramBtn.addActionListener(this);
@@ -217,7 +211,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		// noise and mask menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Tests", menuNoise);
+		tabbedPane.addTab("Tests", menuTest);
 
 		mGaussianTest = new JButton("Gaussian test");
 		mGaussianTest.addActionListener(this);
@@ -263,7 +257,11 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mFilterNegative) {
 			mController.filterNegative();
 		} else if (e.getSource() == mFilterThreshold) {
-			mController.filterThreshold();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "128"));
+			if (params.ask()) {
+				mController.filterThreshold(params.getInteger("threshold"));
+			}
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
 		} else if (e.getSource() == mDesaturateBtn) {
@@ -271,11 +269,24 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
 		} else if (e.getSource() == mApplyAddGaussian) {
-			mController.applyAddGaussianNoise();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "10"));
+			if (params.ask()) {
+				mController.applyAddGaussianNoise(params.getDouble("spread"), params.getDouble("average"));
+			}
 		} else if (e.getSource() == mApplyMulRayleigh) {
-			mController.applyMulRayleighNoise();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			if (params.ask()) {
+				mController.applyMulRayleighNoise(params.getDouble("p"));
+			}
 		} else if (e.getSource() == mApplyMulExponential) {
-			mController.applyMulExponentialNoise();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			if (params.ask()) {
+				mController.applyMulExponentialNoise(params.getDouble("p"));
+			}
 		} else if (e.getSource() == mPepperAndSalt) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p0", 0, 1, "0.02"));
@@ -320,15 +331,15 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mRayleighTest) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
 			if (params.ask()) {
-				mController.displayRayleighChart(params.getDouble("param"));
+				mController.displayRayleighChart(params.getDouble("p"));
 			}
 		} else if (e.getSource() == mExponentialTest) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "param", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
 			if (params.ask()) {
-				mController.displayExponentialChart(params.getDouble("param"));
+				mController.displayExponentialChart(params.getDouble("p"));
 			}
 		}
 	}

@@ -165,6 +165,132 @@ public class Filters {
 		return new Image(newGrayChannel);
 	}
 
+	public static Image filterNegative(Image image) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// inverse the color of each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				redChannel[x][y] = 255 - image.getRed(x, y);
+				greenChannel[x][y] = 255 - image.getGreen(x, y);
+				blueChannel[x][y] = 255 - image.getBlue(x, y);
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image filterThreshold(Image image, int threshold) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// apply the threshold to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				redChannel[x][y] = image.getRed(x, y) < threshold ? 0 : 255;
+				greenChannel[x][y] = image.getGreen(x, y) < threshold ? 0 : 255;
+				blueChannel[x][y] = image.getBlue(x, y) < threshold ? 0 : 255;
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image filterEqualize(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = new int[width][height];
+
+		// let ni be the number of occurrences of gray level i
+		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
+
+		// cumulative frequency distribution
+		int[] cuf = new int[ni.length];
+		cuf[0] = ni[0];
+		for (int i = 1; i < cuf.length; i++) {
+			cuf[i] = cuf[i - 1] + ni[i];
+		}
+
+		int[] cuFeq = new int[ni.length];
+		for (int i = 0; i < cuFeq.length; i++) {
+			cuFeq[i] = (int) (i * cuf[cuf.length - 1] / cuf.length);
+		}
+
+		int[] output = new int[ni.length];
+		for (int i = 0; i < ni.length; i++) {
+			output[i] = equalize(cuf[i], cuFeq);
+		}
+
+		for (int x = 0; x < image.getWidth(); x++) {
+			for (int y = 0; y < image.getHeight(); y++) {
+				grayChannel[x][y] = (int) (output[image.getGray(x, y)]);
+			}
+		}
+
+		return new Image(grayChannel);
+	}
+
+	public static Image applyAddGaussianNoise(Image image, double spread, double average) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+		int[][] grayChannel = image.getGrayChannel();
+
+		// apply the gaussian noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image applyMulRayleighNoise(Image image, double p) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+		int[][] grayChannel = image.getGrayChannel();
+
+		// apply the rayleigh noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image applyMulExponentialNoise(Image image, double p) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+		int[][] grayChannel = image.getGrayChannel();
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
 	public static Image generateGaussianChartImage(double spread, double average) {
 		// generate test data and create a chart out of it
 		int size = 5000;
@@ -329,5 +455,22 @@ public class Filters {
 		}
 
 		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	/**
+	 * Used to find the correct output value for the equalization
+	 * 
+	 * @return
+	 */
+	private static int equalize(int n, int[] cuFeq) {
+		int min = Math.abs(n - cuFeq[0]);
+		int minindex = 0;
+		for (int i = 1; i < cuFeq.length; i++) {
+			if (Math.abs(n - cuFeq[i]) < min) {
+				min = Math.abs(n - cuFeq[i]);
+				minindex = i;
+			}
+		}
+		return minindex;
 	}
 }
