@@ -11,7 +11,6 @@ import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ExtImageIO;
 import ar.edu.itba.imageprocess.utils.FileUtils;
 import ar.edu.itba.imageprocess.utils.Log;
-import ar.edu.itba.imageprocess.utils.RandGenerator;
 
 public class MainController {
 
@@ -199,44 +198,19 @@ public class MainController {
 	 * TP1-2 Creates a negative of the image.
 	 */
 	public void filterNegative() {
-		if (mImagePaneDest != null && mImagePaneSource.getImage() != null) {
-			Image image = mImagePaneSource.getImage();
-			int width = image.getWidth();
-			int height = image.getHeight();
-			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
-
-			for (int i = 0; i < image.getWidth(); i++) {
-				for (int j = 0; j < image.getHeight(); j++) {
-					imageDest.setRGB(i, j, 0xFFFFFF - image.getRGB(i, j));
-				}
-			}
-			mImagePaneDest.setImageWithHistory(new Image(imageDest));
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.filterNegative(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	/**
 	 * TP1-5 Creates a threshold version of the image.
 	 */
-	public void filterThreshold() {
-		if (mImagePaneDest != null) {
-			Image image = mImagePaneSource.getImage();
-			int width = image.getWidth();
-			int height = image.getHeight();
-			BufferedImage imageDest = new BufferedImage(width, height, image.getBufferedImage().getType());
-
-			// TODO - Make sure that you can set the threshold yourself
-			int threshold = 0x888888;
-			for (int i = 0; i < image.getWidth(); i++) {
-				for (int j = 0; j < image.getHeight(); j++) {
-					if (image.getRGB(i, j) < threshold) {
-						imageDest.setRGB(i, j, 0x000000);
-					} else {
-						imageDest.setRGB(i, j, 0xFFFFFF);
-					}
-				}
-			}
-
-			mImagePaneDest.setImageWithHistory(new Image(imageDest));
+	public void filterThreshold(int threshold) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.filterThreshold(mImagePaneSource.getImage(), threshold);
+			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
@@ -245,118 +219,41 @@ public class MainController {
 	 * 
 	 * http://www.mee.tcd.ie/~ack/teaching/1e8/histogram_equalisation_slides.pdf
 	 */
-
-	public int[] filterEqualize() {
-		Image image = mImagePaneSource.getImage();
-
-		// let ni be the number of occurrences of gray level i
-		int[] ni = image.getHistogram(Image.CHANNEL_GRAY);
-
-		// cumulative frequency distribution
-		int[] cuf = new int[ni.length];
-		cuf[0] = ni[0];
-		for (int i = 1; i < cuf.length; i++) {
-			cuf[i] = cuf[i - 1] + ni[i];
+	public void filterEqualize() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.filterEqualize(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
 		}
-
-		int[] cuFeq = new int[ni.length];
-		for (int i = 0; i < cuFeq.length; i++) {
-			cuFeq[i] = (int) (i * cuf[cuf.length - 1] / cuf.length);
-		}
-
-		int[] output = new int[ni.length];
-		for (int i = 0; i < ni.length; i++) {
-			output[i] = equalize(cuf[i], cuFeq);
-		}
-
-		int[][] pic = new int[image.getWidth()][image.getHeight()];
-
-		for (int x = 0; x < image.getWidth(); x++) {
-			for (int y = 0; y < image.getHeight(); y++) {
-				pic[x][y] = (int) (output[image.getGray(x, y)]);
-			}
-		}
-
-		mImagePaneDest.setImageWithHistory(new Image(pic));
-		return null;
 	}
 
 	/**
-	 * Used to find the correct output value for the equalization
-	 * 
-	 * @return
+	 * Adds gaussian noise to an image
 	 */
-	private int equalize(int n, int[] cuFeq) {
-		int min = Math.abs(n - cuFeq[0]);
-		int minindex = 0;
-		for (int i = 1; i < cuFeq.length; i++) {
-			if (Math.abs(n - cuFeq[i]) < min) {
-				min = Math.abs(n - cuFeq[i]);
-				minindex = i;
-			}
+	public void applyAddGaussianNoise(double spread, double average) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyAddGaussianNoise(mImagePaneSource.getImage(), spread, average);
+			mImagePaneDest.setImageWithHistory(image);
 		}
-		return minindex;
 	}
 
 	/**
-	 * adds gaussian blur to an image
+	 * Adds rayleigh noise to an image
 	 */
-	public void applyAddGaussianNoise() {
-		Image image = mImagePaneSource.getImage();
-		int[][] grayChannel = image.getGrayChannel();
-		int width = grayChannel.length;
-		int height = grayChannel[0].length;
-
-		int[][] newGrayChannel = new int[width][height];
-
-		// TODO - make these changeable
-		int spread = 5;
-		int average = 10;
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++)
-				newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+	public void applyMulRayleighNoise(double p) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyMulRayleighNoise(mImagePaneSource.getImage(), p);
+			mImagePaneDest.setImageWithHistory(image);
 		}
-
-		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
 	}
 
-	public void applyMulRayleighNoise() {
-		Image image = mImagePaneSource.getImage();
-		int[][] grayChannel = image.getGrayChannel();
-		int width = grayChannel.length;
-		int height = grayChannel[0].length;
-
-		int[][] newGrayChannel = new int[width][height];
-
-		// TODO - make this changeable
-		int p = 2;
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++)
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+	/**
+	 * Adds exponential noise to an image
+	 */
+	public void applyMulExponentialNoise(double p) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyMulExponentialNoise(mImagePaneSource.getImage(), p);
+			mImagePaneDest.setImageWithHistory(image);
 		}
-
-		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
-	}
-
-	public void applyMulExponentialNoise() {
-		Image image = mImagePaneSource.getImage();
-		int[][] grayChannel = image.getGrayChannel();
-		int width = grayChannel.length;
-		int height = grayChannel[0].length;
-
-		int[][] newGrayChannel = new int[width][height];
-
-		// TODO - make this changeable
-		int p = 2;
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++)
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
-		}
-
-		mImagePaneDest.setImageWithHistory(new Image(newGrayChannel));
 	}
 
 	public void displayGaussianChart(double spread, double average) {
