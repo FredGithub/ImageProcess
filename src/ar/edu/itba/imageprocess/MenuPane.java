@@ -66,6 +66,11 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mMaskHighPass;
 	private JButton mMaskMedian;
 
+	// borders menu
+	private JButton mRobertsBorders;
+	private JButton mPrewittBorders;
+	private JButton mSobelBorders;
+
 	// test menu
 	private JButton mGaussianTest;
 	private JButton mRayleighTest;
@@ -218,6 +223,23 @@ public class MenuPane extends JPanel implements ActionListener {
 		mMaskMedian.addActionListener(this);
 		menuNoise.add(mMaskMedian);
 
+		// borders menu
+
+		JPanel menuBorders = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Borders", menuBorders);
+
+		mRobertsBorders = new JButton("Roberts");
+		mRobertsBorders.addActionListener(this);
+		menuBorders.add(mRobertsBorders);
+
+		mPrewittBorders = new JButton("Prewitt");
+		mPrewittBorders.addActionListener(this);
+		menuBorders.add(mPrewittBorders);
+
+		mSobelBorders = new JButton("Sobel");
+		mSobelBorders.addActionListener(this);
+		menuBorders.add(mSobelBorders);
+
 		// noise and mask menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -366,6 +388,12 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.displayExponentialChart(params.getDouble("p"));
 			}
+		} else if (e.getSource() == mRobertsBorders) {
+			mController.robertsBordersDetection();
+		} else if (e.getSource() == mPrewittBorders) {
+			mController.prewittBordersDetection();
+		} else if (e.getSource() == mSobelBorders) {
+			mController.sobelBordersDetection();
 		}
 	}
 

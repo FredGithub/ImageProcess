@@ -318,4 +318,25 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void robertsBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.robertsBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void prewittBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.prewittBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void sobelBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.sobelBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

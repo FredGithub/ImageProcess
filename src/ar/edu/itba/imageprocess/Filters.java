@@ -544,6 +544,71 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image robertsBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx = image.getGray(x, y) - image.getGray(x + 1, y + 1);
+				int gy = image.getGray(x + 1, y) - image.getGray(x, y + 1);
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image prewittBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx1 = image.getGray(x, y + 2) + image.getGray(x + 1, y + 2) + image.getGray(x + 2, y + 2);
+				int gx2 = image.getGray(x, y) + image.getGray(x + 1, y) + image.getGray(x + 2, y);
+				int gx = gx1 - gx2;
+				int gy1 = image.getGray(x + 2, y) + image.getGray(x + 2, y + 1) + image.getGray(x + 2, y + 2);
+				int gy2 = image.getGray(x, y) + image.getGray(x, y + 1) + image.getGray(x, y + 2);
+				int gy = gy1 - gy2;
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image sobelBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx1 = image.getGray(x, y + 2) + 2 * image.getGray(x + 1, y + 2) + image.getGray(x + 2, y + 2);
+				int gx2 = image.getGray(x, y) + 2 * image.getGray(x + 1, y) + image.getGray(x + 2, y);
+				int gx = gx1 - gx2;
+				int gy1 = image.getGray(x + 2, y) + 2 * image.getGray(x + 2, y + 1) + image.getGray(x + 2, y + 2);
+				int gy2 = image.getGray(x, y) + 2 * image.getGray(x, y + 1) + image.getGray(x, y + 2);
+				int gy = gy1 - gy2;
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
 	/**
 	 * Used to find the correct output value for the equalization
 	 * 
