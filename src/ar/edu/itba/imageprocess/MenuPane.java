@@ -194,25 +194,25 @@ public class MenuPane extends JPanel implements ActionListener {
 		mApplyMulRayleigh.addActionListener(this);
 		menuNoise.add(mApplyMulRayleigh);
 
-		mApplyMulExponential = new JButton("Mul Exponential");
+		mApplyMulExponential = new JButton("Mul Exp");
 		mApplyMulExponential.addActionListener(this);
 		menuNoise.add(mApplyMulExponential);
 
-		mPepperAndSalt = new JButton("Pepper and salt");
+		mPepperAndSalt = new JButton("Pepper salt");
 		mPepperAndSalt.addActionListener(this);
 		menuNoise.add(mPepperAndSalt);
 
-		mMaskAverage = new JButton("Average mask");
+		mMaskAverage = new JButton("Avg mask");
 		mMaskAverage.addActionListener(this);
 		menuNoise.add(mMaskAverage);
-
-		mMaskGaussian = new JButton("Gaussian mask");
-		mMaskGaussian.addActionListener(this);
-		// menuNoise.add(mMaskGaussian);
 
 		mMaskHighPass = new JButton("High pass mask");
 		mMaskHighPass.addActionListener(this);
 		menuNoise.add(mMaskHighPass);
+
+		mMaskGaussian = new JButton("Gaussian mask");
+		mMaskGaussian.addActionListener(this);
+		menuNoise.add(mMaskGaussian);
 
 		mMaskMedian = new JButton("Median mask");
 		mMaskMedian.addActionListener(this);
@@ -327,10 +327,11 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mMaskGaussian) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "5"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "0.8"));
 			if (params.ask()) {
-				mController.applyFactorMaskFilter(params.getInteger("width"), params.getInteger("height"), Filters.MASK_FILTER_GAUSSIAN);
+				mController.applyGaussianMaskFilter(params.getInteger("width"), params.getInteger("height"), params.getDouble("spread"));
 			}
 		} else if (e.getSource() == mMaskHighPass) {
 			ParamAsker params = new ParamAsker();

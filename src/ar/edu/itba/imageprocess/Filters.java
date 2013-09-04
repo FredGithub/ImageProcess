@@ -17,8 +17,7 @@ public class Filters {
 	public static final int CHART_WIDTH = 400;
 	public static final int CHART_HEIGHT = 300;
 	public static final int MASK_FILTER_AVERAGE = 1;
-	public static final int MASK_FILTER_GAUSSIAN = 2;
-	public static final int MASK_FILTER_HIGH_PASS = 3;
+	public static final int MASK_FILTER_HIGH_PASS = 2;
 
 	public static Image generateWhiteImage(int width, int height) {
 		int[][] grayChannel = new int[width][height];
@@ -448,8 +447,6 @@ public class Filters {
 					mask[x][y] = 1;
 				}
 			}
-		} else if (filterType == MASK_FILTER_GAUSSIAN) {
-
 		} else if (filterType == MASK_FILTER_HIGH_PASS) {
 			factor = 1.0 / (maskWidth * maskHeight);
 			for (int x = 0; x < maskWidth; x++) {
@@ -463,28 +460,46 @@ public class Filters {
 			}
 		}
 
-		// apply the mask on each pixel of the image
-		for (int pixelX = 0; pixelX < width; pixelX++) {
-			for (int pixelY = 0; pixelY < height; pixelY++) {
-				double redSum = 0;
-				double greenSum = 0;
-				double blueSum = 0;
+		// apply the mask
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
-				// iterate over the mask for that pixel
-				for (int x = 0; x < maskWidth; x++) {
-					for (int y = 0; y < maskHeight; y++) {
-						redSum += mask[x][y] * image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
-						greenSum += mask[x][y] * image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
-						blueSum += mask[x][y] * image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
-					}
-				}
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
 
-				// set the new image pixels
-				redChannel[pixelX][pixelY] = (int) (redSum * factor);
-				greenChannel[pixelX][pixelY] = (int) (greenSum * factor);
-				blueChannel[pixelX][pixelY] = (int) (blueSum * factor);
+	public static Image applyGaussianMaskFilter(Image image, int maskWidth, int maskHeight, double spread) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// get the position of the pixel at the center of the mask
+		// if one side has an even length, for example maskWidth = 8
+		// the center is considered to be 3 (the fourth column)
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// setup the mask and the factor
+		int[][] mask = new int[maskWidth][maskHeight];
+		double intensity = 100;
+		double factor = 1.0 / (maskWidth * maskHeight);
+		factor = 1.0 / intensity;
+		double spread2 = spread * spread;
+		double f = 1 / (2 * Math.PI * spread2);
+		Log.d("f=" + f + " factor=" + factor);
+
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
+				double exp = Math.exp((-1 * dist) / spread2);
+				mask[x][y] = (int) (intensity * f * exp);
+				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (f * exp));
 			}
 		}
+
+		// apply the mask
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
@@ -544,5 +559,36 @@ public class Filters {
 			}
 		}
 		return minindex;
+	}
+
+	private static void applyFactorMask(Image image, int[][] mask, double factor, int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int maskWidth = mask.length;
+		int maskHeight = mask[0].length;
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				double redSum = 0;
+				double greenSum = 0;
+				double blueSum = 0;
+
+				// iterate over the mask for that pixel
+				for (int x = 0; x < maskWidth; x++) {
+					for (int y = 0; y < maskHeight; y++) {
+						redSum += mask[x][y] * image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
+						greenSum += mask[x][y] * image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
+						blueSum += mask[x][y] * image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
+					}
+				}
+
+				// set the new image pixels
+				redChannel[pixelX][pixelY] = (int) (redSum * factor);
+				greenChannel[pixelX][pixelY] = (int) (greenSum * factor);
+				blueChannel[pixelX][pixelY] = (int) (blueSum * factor);
+			}
+		}
 	}
 }

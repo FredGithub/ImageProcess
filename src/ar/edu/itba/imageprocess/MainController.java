@@ -305,6 +305,13 @@ public class MainController {
 		}
 	}
 
+	public void applyGaussianMaskFilter(int maskWidth, int maskHeight, double spread) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyGaussianMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight, spread);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void applyMedianMaskFilter(int maskWidth, int maskHeight) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.applyMedianMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight);
