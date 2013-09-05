@@ -438,7 +438,7 @@ public class Filters {
 		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
 
 		// setup the mask and the factor
-		int[][] mask = new int[maskWidth][maskHeight];
+		double[][] mask = new double[maskWidth][maskHeight];
 		double factor = 0;
 		if (filterType == MASK_FILTER_AVERAGE) {
 			factor = 1.0 / (maskWidth * maskHeight);
@@ -481,23 +481,29 @@ public class Filters {
 		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
 
 		// setup the mask and the factor
-		int[][] mask = new int[maskWidth][maskHeight];
-		double intensity = 100;
-		double factor = 1.0 / (maskWidth * maskHeight);
-		factor = 1.0 / intensity;
+		double[][] mask = new double[maskWidth][maskHeight];
 		double spread2 = spread * spread;
-		double f = 1 / (2 * Math.PI * spread2);
-		Log.d("f=" + f + " factor=" + factor);
+		double factor = 1.0 / (2 * Math.PI * spread2);
+		Log.d("factor=" + factor);
 
+		double total =0;
 		for (int x = 0; x < maskWidth; x++) {
 			for (int y = 0; y < maskHeight; y++) {
 				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
 				double exp = Math.exp((-1 * dist) / spread2);
-				mask[x][y] = (int) (intensity * f * exp);
-				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (f * exp));
+				mask[x][y] = exp;
+				total+= exp;
+				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (exp));
 			}
 		}
+		
 
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				mask[x][y] = mask[x][y] / total;
+				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (mask[x][y]));
+			}
+		}
 		// apply the mask
 		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
@@ -626,7 +632,7 @@ public class Filters {
 		return minindex;
 	}
 
-	private static void applyFactorMask(Image image, int[][] mask, double factor, int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+	private static void applyFactorMask(Image image, double[][] mask, double factor, int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int maskWidth = mask.length;
