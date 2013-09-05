@@ -17,8 +17,7 @@ public class Filters {
 	public static final int CHART_WIDTH = 400;
 	public static final int CHART_HEIGHT = 300;
 	public static final int MASK_FILTER_AVERAGE = 1;
-	public static final int MASK_FILTER_GAUSSIAN = 2;
-	public static final int MASK_FILTER_HIGH_PASS = 3;
+	public static final int MASK_FILTER_HIGH_PASS = 2;
 
 	public static Image generateWhiteImage(int width, int height) {
 		int[][] grayChannel = new int[width][height];
@@ -140,17 +139,43 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static Image compress(Image image) {
+	public static Image compressLinear(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
 		int[][] grayChannel = image.getGrayChannel();
-		int[][] newGrayChannel = new int[image.getWidth()][image.getHeight()];
+		int[][] newGrayChannel = new int[width][height];
+
+		// get the bounds and calculate the linear transform parameters
+		int[] range = image.getRange(Image.CHANNEL_GRAY);
+		double factor = (double) 255 / (range[1] - range[0]);
+		double b = -factor * range[0];
+		Log.d("factor=" + factor + " b=" + b);
+
+		// apply the filter to all pixels
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				newGrayChannel[x][y] = (int) (grayChannel[x][y] * factor + b);
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image compress(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
+		int[][] newGrayChannel = new int[width][height];
 
 		// get the maximum gray level and the factor of compression
 		int max = ArrayUtils.max(grayChannel);
 		double c = 255 / Math.log(max);
 
 		// apply the filter to all pixels
-		for (int x = 0; x < image.getWidth(); x++) {
-			for (int y = 0; y < image.getHeight(); y++) {
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
 				// only apply the filter if the max gray level is above 255
 				if (max > 255) {
 					newGrayChannel[x][y] = (int) (c * Math.log(grayChannel[x][y] + 1));
@@ -205,6 +230,37 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image filterContrast(Image image, int r1, int r2, int s1, int s2) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = new int[width][height];
+
+		// calculate the three linear transforms parameters
+		double factor1 = (double) (s1 - 0) / (r1 - 0);
+		double b1 = 0;
+		double factor2 = (double) (s2 - s1) / (r2 - r1);
+		double b2 = -factor2 * r1 + s1;
+		double factor3 = (double) (255 - s2) / (255 - r2);
+		double b3 = -factor3 * r2 + s2;
+
+		// apply the transforms to each pixels
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gray = image.getGray(x, y);
+				if (gray <= r1) {
+					grayChannel[x][y] = (int) (gray * factor1 + b1);
+				} else if (gray <= r2) {
+					grayChannel[x][y] = (int) (gray * factor2 + b2);
+				} else {
+					grayChannel[x][y] = (int) (gray * factor3 + b3);
+				}
+			}
+		}
+
+		return new Image(grayChannel);
+	}
+
 	public static Image filterEqualize(Image image) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
@@ -240,7 +296,7 @@ public class Filters {
 		return new Image(grayChannel);
 	}
 
-	public static Image applyAddGaussianNoise(Image image, double spread, double average) {
+	public static Image applyAddGaussianNoise(Image image, double spread, double average, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -250,14 +306,19 @@ public class Filters {
 		// apply the gaussian noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 
 		return new Image(newGrayChannel);
 	}
 
-	public static Image applyMulRayleighNoise(Image image, double p) {
+	public static Image applyMulRayleighNoise(Image image, double p, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -267,14 +328,19 @@ public class Filters {
 		// apply the rayleigh noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.rayleigh(p)));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 
 		return new Image(newGrayChannel);
 	}
 
-	public static Image applyMulExponentialNoise(Image image, double p) {
+	public static Image applyMulExponentialNoise(Image image, double p, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -284,7 +350,12 @@ public class Filters {
 		// apply the exponential noise to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+				double rand = Math.random();
+				if (rand <= percentage) {
+					newGrayChannel[x][y] = (int) (grayChannel[x][y] * (RandGenerator.exponential(p)));
+				} else {
+					newGrayChannel[x][y] = grayChannel[x][y];
+				}
 			}
 		}
 
@@ -376,8 +447,6 @@ public class Filters {
 					mask[x][y] = 1;
 				}
 			}
-		} else if (filterType == MASK_FILTER_GAUSSIAN) {
-
 		} else if (filterType == MASK_FILTER_HIGH_PASS) {
 			factor = 1.0 / (maskWidth * maskHeight);
 			for (int x = 0; x < maskWidth; x++) {
@@ -391,28 +460,46 @@ public class Filters {
 			}
 		}
 
-		// apply the mask on each pixel of the image
-		for (int pixelX = 0; pixelX < width; pixelX++) {
-			for (int pixelY = 0; pixelY < height; pixelY++) {
-				double redSum = 0;
-				double greenSum = 0;
-				double blueSum = 0;
+		// apply the mask
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
-				// iterate over the mask for that pixel
-				for (int x = 0; x < maskWidth; x++) {
-					for (int y = 0; y < maskHeight; y++) {
-						redSum += mask[x][y] * image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
-						greenSum += mask[x][y] * image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
-						blueSum += mask[x][y] * image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
-					}
-				}
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
 
-				// set the new image pixels
-				redChannel[pixelX][pixelY] = (int) (redSum * factor);
-				greenChannel[pixelX][pixelY] = (int) (greenSum * factor);
-				blueChannel[pixelX][pixelY] = (int) (blueSum * factor);
+	public static Image applyGaussianMaskFilter(Image image, int maskWidth, int maskHeight, double spread) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// get the position of the pixel at the center of the mask
+		// if one side has an even length, for example maskWidth = 8
+		// the center is considered to be 3 (the fourth column)
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// setup the mask and the factor
+		int[][] mask = new int[maskWidth][maskHeight];
+		double intensity = 100;
+		double factor = 1.0 / (maskWidth * maskHeight);
+		factor = 1.0 / intensity;
+		double spread2 = spread * spread;
+		double f = 1 / (2 * Math.PI * spread2);
+		Log.d("f=" + f + " factor=" + factor);
+
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
+				double exp = Math.exp((-1 * dist) / spread2);
+				mask[x][y] = (int) (intensity * f * exp);
+				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (f * exp));
 			}
 		}
+
+		// apply the mask
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
@@ -457,6 +544,71 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image robertsBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx = image.getGray(x, y) - image.getGray(x + 1, y + 1);
+				int gy = image.getGray(x + 1, y) - image.getGray(x, y + 1);
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image prewittBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx1 = image.getGray(x, y + 2) + image.getGray(x + 1, y + 2) + image.getGray(x + 2, y + 2);
+				int gx2 = image.getGray(x, y) + image.getGray(x + 1, y) + image.getGray(x + 2, y);
+				int gx = gx1 - gx2;
+				int gy1 = image.getGray(x + 2, y) + image.getGray(x + 2, y + 1) + image.getGray(x + 2, y + 2);
+				int gy2 = image.getGray(x, y) + image.getGray(x, y + 1) + image.getGray(x, y + 2);
+				int gy = gy1 - gy2;
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
+	public static Image sobelBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		// apply the exponential noise to each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int gx1 = image.getGray(x, y + 2) + 2 * image.getGray(x + 1, y + 2) + image.getGray(x + 2, y + 2);
+				int gx2 = image.getGray(x, y) + 2 * image.getGray(x + 1, y) + image.getGray(x + 2, y);
+				int gx = gx1 - gx2;
+				int gy1 = image.getGray(x + 2, y) + 2 * image.getGray(x + 2, y + 1) + image.getGray(x + 2, y + 2);
+				int gy2 = image.getGray(x, y) + 2 * image.getGray(x, y + 1) + image.getGray(x, y + 2);
+				int gy = gy1 - gy2;
+				int gradient = (int) Math.sqrt(gx * gx + gy * gy);
+				newGrayChannel[x][y] = gradient;
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
 	/**
 	 * Used to find the correct output value for the equalization
 	 * 
@@ -472,5 +624,36 @@ public class Filters {
 			}
 		}
 		return minindex;
+	}
+
+	private static void applyFactorMask(Image image, int[][] mask, double factor, int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int maskWidth = mask.length;
+		int maskHeight = mask[0].length;
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				double redSum = 0;
+				double greenSum = 0;
+				double blueSum = 0;
+
+				// iterate over the mask for that pixel
+				for (int x = 0; x < maskWidth; x++) {
+					for (int y = 0; y < maskHeight; y++) {
+						redSum += mask[x][y] * image.getRed(pixelX - offsetX + x, pixelY - offsetY + y);
+						greenSum += mask[x][y] * image.getGreen(pixelX - offsetX + x, pixelY - offsetY + y);
+						blueSum += mask[x][y] * image.getBlue(pixelX - offsetX + x, pixelY - offsetY + y);
+					}
+				}
+
+				// set the new image pixels
+				redChannel[pixelX][pixelY] = (int) (redSum * factor);
+				greenChannel[pixelX][pixelY] = (int) (greenSum * factor);
+				blueChannel[pixelX][pixelY] = (int) (blueSum * factor);
+			}
+		}
 	}
 }

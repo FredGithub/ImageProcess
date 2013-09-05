@@ -45,13 +45,15 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mAddImages;
 	private JButton mSubtractImages;
 	private JButton mMultiplyScalar;
+	private JButton mLinearCompression;
 	private JButton mCompression;
 
 	// histogram menu
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
 	private JButton mHistogramBtn;
-	private JButton mDesaturateBtn;
+	private JButton mBlackAndWhiteBtn;
+	private JButton mContrastBtn;
 	private JButton mEqualizeBtn;
 
 	// noise and mask menu
@@ -63,6 +65,11 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mMaskGaussian;
 	private JButton mMaskHighPass;
 	private JButton mMaskMedian;
+
+	// borders menu
+	private JButton mRobertsBorders;
+	private JButton mPrewittBorders;
+	private JButton mSobelBorders;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -142,6 +149,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mMultiplyScalar.addActionListener(this);
 		menuShape.add(mMultiplyScalar);
 
+		mLinearCompression = new JButton("Linear compression");
+		mLinearCompression.addActionListener(this);
+		menuShape.add(mLinearCompression);
+
 		mCompression = new JButton("Compression");
 		mCompression.addActionListener(this);
 		menuShape.add(mCompression);
@@ -163,9 +174,13 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHistogramBtn.addActionListener(this);
 		menuHistogram.add(mHistogramBtn);
 
-		mDesaturateBtn = new JButton("Desaturate");
-		mDesaturateBtn.addActionListener(this);
-		menuHistogram.add(mDesaturateBtn);
+		mBlackAndWhiteBtn = new JButton("Black and white");
+		mBlackAndWhiteBtn.addActionListener(this);
+		menuHistogram.add(mBlackAndWhiteBtn);
+
+		mContrastBtn = new JButton("Linear contrast");
+		mContrastBtn.addActionListener(this);
+		menuHistogram.add(mContrastBtn);
 
 		mEqualizeBtn = new JButton("Equalize");
 		mEqualizeBtn.addActionListener(this);
@@ -184,29 +199,46 @@ public class MenuPane extends JPanel implements ActionListener {
 		mApplyMulRayleigh.addActionListener(this);
 		menuNoise.add(mApplyMulRayleigh);
 
-		mApplyMulExponential = new JButton("Mul Exponential");
+		mApplyMulExponential = new JButton("Mul Exp");
 		mApplyMulExponential.addActionListener(this);
 		menuNoise.add(mApplyMulExponential);
 
-		mPepperAndSalt = new JButton("Pepper and salt");
+		mPepperAndSalt = new JButton("Pepper salt");
 		mPepperAndSalt.addActionListener(this);
 		menuNoise.add(mPepperAndSalt);
 
-		mMaskAverage = new JButton("Average mask");
+		mMaskAverage = new JButton("Avg mask");
 		mMaskAverage.addActionListener(this);
 		menuNoise.add(mMaskAverage);
-
-		mMaskGaussian = new JButton("Gaussian mask");
-		mMaskGaussian.addActionListener(this);
-		// menuNoise.add(mMaskGaussian);
 
 		mMaskHighPass = new JButton("High pass mask");
 		mMaskHighPass.addActionListener(this);
 		menuNoise.add(mMaskHighPass);
 
+		mMaskGaussian = new JButton("Gaussian mask");
+		mMaskGaussian.addActionListener(this);
+		menuNoise.add(mMaskGaussian);
+
 		mMaskMedian = new JButton("Median mask");
 		mMaskMedian.addActionListener(this);
 		menuNoise.add(mMaskMedian);
+
+		// borders menu
+
+		JPanel menuBorders = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Borders", menuBorders);
+
+		mRobertsBorders = new JButton("Roberts");
+		mRobertsBorders.addActionListener(this);
+		menuBorders.add(mRobertsBorders);
+
+		mPrewittBorders = new JButton("Prewitt");
+		mPrewittBorders.addActionListener(this);
+		menuBorders.add(mPrewittBorders);
+
+		mSobelBorders = new JButton("Sobel");
+		mSobelBorders.addActionListener(this);
+		menuBorders.add(mSobelBorders);
 
 		// noise and mask menu
 
@@ -252,6 +284,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.multiplyScalar(params.getDouble("scalar"));
 			}
+		} else if (e.getSource() == mLinearCompression) {
+			mController.compressLinear();
 		} else if (e.getSource() == mCompression) {
 			mController.compress();
 		} else if (e.getSource() == mFilterNegative) {
@@ -264,28 +298,40 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
-		} else if (e.getSource() == mDesaturateBtn) {
+		} else if (e.getSource() == mBlackAndWhiteBtn) {
 			mController.desaturate();
+		} else if (e.getSource() == mContrastBtn) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "r1", 0, 255, "80"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "r2", 0, 255, "180"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "s1", 0, 255, "40"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "s2", 0, 255, "220"));
+			if (params.ask()) {
+				mController.filterContrast(params.getInteger("r1"), params.getInteger("r2"), params.getInteger("s1"), params.getInteger("s2"));
+			}
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
 		} else if (e.getSource() == mApplyAddGaussian) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "5"));
 			params.addParam(new Param(Param.TYPE_DOUBLE, "average", "10"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyAddGaussianNoise(params.getDouble("spread"), params.getDouble("average"));
+				mController.applyAddGaussianNoise(params.getDouble("spread"), params.getDouble("average"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mApplyMulRayleigh) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyMulRayleighNoise(params.getDouble("p"));
+				mController.applyMulRayleighNoise(params.getDouble("p"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mApplyMulExponential) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "p", "0.5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "percentage", 0, 1, "0.2"));
 			if (params.ask()) {
-				mController.applyMulExponentialNoise(params.getDouble("p"));
+				mController.applyMulExponentialNoise(params.getDouble("p"), params.getDouble("percentage"));
 			}
 		} else if (e.getSource() == mPepperAndSalt) {
 			ParamAsker params = new ParamAsker();
@@ -303,10 +349,11 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mMaskGaussian) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "3"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "5"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "5"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "0.8"));
 			if (params.ask()) {
-				mController.applyFactorMaskFilter(params.getInteger("width"), params.getInteger("height"), Filters.MASK_FILTER_GAUSSIAN);
+				mController.applyGaussianMaskFilter(params.getInteger("width"), params.getInteger("height"), params.getDouble("spread"));
 			}
 		} else if (e.getSource() == mMaskHighPass) {
 			ParamAsker params = new ParamAsker();
@@ -341,6 +388,12 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.displayExponentialChart(params.getDouble("p"));
 			}
+		} else if (e.getSource() == mRobertsBorders) {
+			mController.robertsBordersDetection();
+		} else if (e.getSource() == mPrewittBorders) {
+			mController.prewittBordersDetection();
+		} else if (e.getSource() == mSobelBorders) {
+			mController.sobelBordersDetection();
 		}
 	}
 

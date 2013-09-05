@@ -172,6 +172,13 @@ public class MainController {
 		}
 	}
 
+	public void compressLinear() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.compressLinear(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void compress() {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.compress(mImagePaneSource.getImage());
@@ -214,6 +221,13 @@ public class MainController {
 		}
 	}
 
+	public void filterContrast(int r1, int r2, int s1, int s2) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.filterContrast(mImagePaneSource.getImage(), r1, r2, s1, s2);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	/**
 	 * TP1-6 histogram equalization
 	 * 
@@ -229,9 +243,10 @@ public class MainController {
 	/**
 	 * Adds gaussian noise to an image
 	 */
-	public void applyAddGaussianNoise(double spread, double average) {
+
+	public void applyAddGaussianNoise(double spread, double average, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.applyAddGaussianNoise(mImagePaneSource.getImage(), spread, average);
+			Image image = Filters.applyAddGaussianNoise(mImagePaneSource.getImage(), spread, average, percentage);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
@@ -239,9 +254,10 @@ public class MainController {
 	/**
 	 * Adds rayleigh noise to an image
 	 */
-	public void applyMulRayleighNoise(double p) {
+
+	public void applyMulRayleighNoise(double p, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.applyMulRayleighNoise(mImagePaneSource.getImage(), p);
+			Image image = Filters.applyMulRayleighNoise(mImagePaneSource.getImage(), p, percentage);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
@@ -249,9 +265,9 @@ public class MainController {
 	/**
 	 * Adds exponential noise to an image
 	 */
-	public void applyMulExponentialNoise(double p) {
+	public void applyMulExponentialNoise(double p, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.applyMulExponentialNoise(mImagePaneSource.getImage(), p);
+			Image image = Filters.applyMulExponentialNoise(mImagePaneSource.getImage(), p, percentage);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
@@ -291,9 +307,37 @@ public class MainController {
 		}
 	}
 
+	public void applyGaussianMaskFilter(int maskWidth, int maskHeight, double spread) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.applyGaussianMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight, spread);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void applyMedianMaskFilter(int maskWidth, int maskHeight) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.applyMedianMaskFilter(mImagePaneSource.getImage(), maskWidth, maskHeight);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void robertsBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.robertsBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void prewittBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.prewittBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void sobelBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.sobelBorderDetection(mImagePaneSource.getImage());
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
