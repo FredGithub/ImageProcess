@@ -349,9 +349,9 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mMaskGaussian) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_INTEGER, "width", 1, 10, "5"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "height", 1, 10, "5"));
-			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "0.8"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "2"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", "0"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", "0"));
 			if (params.ask()) {
 				mController.applyGaussianMaskFilter(params.getInteger("width"), params.getInteger("height"), params.getDouble("spread"));
 			}

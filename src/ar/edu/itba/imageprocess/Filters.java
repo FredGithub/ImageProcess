@@ -474,6 +474,13 @@ public class Filters {
 		int[][] greenChannel = new int[width][height];
 		int[][] blueChannel = new int[width][height];
 
+		// if the provided size for the mask is 0, we use automatic mask size
+		// based on spread parameter
+		if (maskWidth == 0 || maskHeight == 0) {
+			maskWidth = (int) (6 * spread);
+			maskHeight = (int) (6 * spread);
+		}
+
 		// get the position of the pixel at the center of the mask
 		// if one side has an even length, for example maskWidth = 8
 		// the center is considered to be 3 (the fourth column)
@@ -484,26 +491,20 @@ public class Filters {
 		double[][] mask = new double[maskWidth][maskHeight];
 		double spread2 = spread * spread;
 		double factor = 1.0 / (2 * Math.PI * spread2);
-		Log.d("factor=" + factor);
 
-		double total =0;
+		double total = 0;
 		for (int x = 0; x < maskWidth; x++) {
 			for (int y = 0; y < maskHeight; y++) {
 				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
 				double exp = Math.exp((-1 * dist) / spread2);
 				mask[x][y] = exp;
-				total+= exp;
-				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (exp));
+				total += exp;
 			}
 		}
-		
 
-		for (int x = 0; x < maskWidth; x++) {
-			for (int y = 0; y < maskHeight; y++) {
-				mask[x][y] = mask[x][y] / total;
-				Log.d("val(" + (x - offsetX) + "," + (y - offsetY) + ")=" + (mask[x][y]));
-			}
-		}
+		// the original factor doesn't work properly. use this one instead
+		factor = 1 / total;
+
 		// apply the mask
 		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 
