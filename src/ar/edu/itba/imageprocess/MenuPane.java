@@ -72,6 +72,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mSobelBorders;
 	private JButton mSimpleBorders;
 	private JButton mKirshBorders;
+	private JButton mLaplacianBorders;
+	private JButton mLaplacianLocalBorders;
+	private JButton mLaplacianGaussianBorders;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -250,6 +253,18 @@ public class MenuPane extends JPanel implements ActionListener {
 		mKirshBorders.addActionListener(this);
 		menuBorders.add(mKirshBorders);
 
+		mLaplacianBorders = new JButton("Laplacian");
+		mLaplacianBorders.addActionListener(this);
+		menuBorders.add(mLaplacianBorders);
+
+		mLaplacianLocalBorders = new JButton("Laplacian loc.");
+		mLaplacianLocalBorders.addActionListener(this);
+		menuBorders.add(mLaplacianLocalBorders);
+
+		mLaplacianGaussianBorders = new JButton("Laplacian gau.");
+		mLaplacianGaussianBorders.addActionListener(this);
+		menuBorders.add(mLaplacianGaussianBorders);
+
 		// noise and mask menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -408,6 +423,12 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.simpleBordersDetection();
 		} else if (e.getSource() == mKirshBorders) {
 			mController.kirshBordersDetection();
+		} else if (e.getSource() == mLaplacianBorders) {
+			mController.laplacianBordersDetection();
+		} else if (e.getSource() == mLaplacianLocalBorders) {
+			mController.laplacianLocalBordersDetection();
+		} else if (e.getSource() == mLaplacianGaussianBorders) {
+			mController.laplacianGaussianBordersDetection();
 		}
 	}
 

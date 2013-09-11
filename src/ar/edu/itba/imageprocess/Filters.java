@@ -653,6 +653,48 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static Image laplacianBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// build the masks
+		double[][] mask = { { 0, -1, 0 }, { -1, 4, -1 }, { 0, -1, 0 } };
+		ArrayList<double[][]> masks = new ArrayList<double[][]>();
+		masks.add(mask);
+
+		// apply the masks and get a temporary image out of it
+		applyFactorMask(image, mask, 1, redChannel, greenChannel, blueChannel);
+		Image tmpImage = new Image(redChannel, greenChannel, blueChannel);
+
+		// find the zero crossings
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				// get the previous value. if the pixel to the left of the current pixel is zero
+				// take the one even before
+				int prevVal = tmpImage.getRed(x - 1, y) != 0 ? tmpImage.getRed(x - 1, y) : tmpImage.getRed(x - 2, y);
+
+				// get the slope if there is a zero crossing
+				int slopeRed = 0;
+				if (tmpImage.getRed(x, y) > 0 && prevVal < 0 || tmpImage.getRed(x, y) < 0 && prevVal > 0) {
+					slopeRed = tmpImage.getRed(x, y) - prevVal;
+				}
+
+				// apply the pixel value based on the slope
+				if (Math.abs(slopeRed) > 0) {
+					redChannel[x][y] = 255;
+				} else {
+					redChannel[x][y] = 0;
+				}
+			}
+		}
+
+		return new Image(redChannel);
+	}
+
 	/**
 	 * Used to find the correct output value for the equalization
 	 * 
@@ -738,9 +780,9 @@ public class Filters {
 				}
 
 				// set the new image pixels
-				redChannel[pixelX][pixelY] = (int) Math.sqrt(totalRedSum);
-				greenChannel[pixelX][pixelY] = (int) Math.sqrt(totalGreenSum);
-				blueChannel[pixelX][pixelY] = (int) Math.sqrt(totalBlueSum);
+				redChannel[pixelX][pixelY] = (int) Math.min(255, Math.max(0, Math.sqrt(totalRedSum)));
+				greenChannel[pixelX][pixelY] = (int) Math.min(255, Math.max(0, Math.sqrt(totalGreenSum)));
+				blueChannel[pixelX][pixelY] = (int) Math.min(255, Math.max(0, Math.sqrt(totalBlueSum)));
 			}
 		}
 	}
