@@ -341,4 +341,18 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void simpleBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.simpleBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void kirshBordersDetection() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.kirshBorderDetection(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

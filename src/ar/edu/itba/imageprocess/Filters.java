@@ -582,8 +582,8 @@ public class Filters {
 		int[][] blueChannel = new int[width][height];
 
 		// build the masks
-		double[][] maskX = { { -1, -1, -1 }, { 0, 0, 0 }, { 1, 1, 1 } };
-		double[][] maskY = { { -1, 0, 1 }, { -1, 0, 1 }, { -1, 0, 1 } };
+		double[][] maskX = { { -1, 0, 1 }, { -1, 0, 1 }, { -1, 0, 1 } };
+		double[][] maskY = { { -1, -1, -1 }, { 0, 0, 0 }, { 1, 1, 1 } };
 		ArrayList<double[][]> masks = new ArrayList<double[][]>();
 		masks.add(maskX);
 		masks.add(maskY);
@@ -603,11 +603,49 @@ public class Filters {
 		int[][] blueChannel = new int[width][height];
 
 		// build the masks
-		double[][] maskX = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
-		double[][] maskY = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+		double[][] maskX = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+		double[][] maskY = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
 		ArrayList<double[][]> masks = new ArrayList<double[][]>();
 		masks.add(maskX);
 		masks.add(maskY);
+
+		// apply the masks
+		applyGradientMask(image, masks, redChannel, greenChannel, blueChannel);
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image simpleBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// build the masks
+		double[][] mask = { { 1, 1, 1 }, { 1, -2, 1 }, { -1, -1, -1 } };
+		ArrayList<double[][]> masks = new ArrayList<double[][]>();
+		masks.add(mask);
+
+		// apply the masks
+		applyGradientMask(image, masks, redChannel, greenChannel, blueChannel);
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
+	public static Image kirshBorderDetection(Image image) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// build the masks
+		double[][] mask = { { 5, 5, 5 }, { -3, 0, -3 }, { -3, -3, -3 } };
+		ArrayList<double[][]> masks = new ArrayList<double[][]>();
+		masks.add(mask);
 
 		// apply the masks
 		applyGradientMask(image, masks, redChannel, greenChannel, blueChannel);

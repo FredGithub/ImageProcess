@@ -70,6 +70,8 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mRobertsBorders;
 	private JButton mPrewittBorders;
 	private JButton mSobelBorders;
+	private JButton mSimpleBorders;
+	private JButton mKirshBorders;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -240,6 +242,14 @@ public class MenuPane extends JPanel implements ActionListener {
 		mSobelBorders.addActionListener(this);
 		menuBorders.add(mSobelBorders);
 
+		mSimpleBorders = new JButton("Simple");
+		mSimpleBorders.addActionListener(this);
+		menuBorders.add(mSimpleBorders);
+
+		mKirshBorders = new JButton("Kirsh");
+		mKirshBorders.addActionListener(this);
+		menuBorders.add(mKirshBorders);
+
 		// noise and mask menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -394,6 +404,10 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.prewittBordersDetection();
 		} else if (e.getSource() == mSobelBorders) {
 			mController.sobelBordersDetection();
+		} else if (e.getSource() == mSimpleBorders) {
+			mController.simpleBordersDetection();
+		} else if (e.getSource() == mKirshBorders) {
+			mController.kirshBordersDetection();
 		}
 	}
 
