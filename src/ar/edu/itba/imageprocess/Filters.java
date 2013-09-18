@@ -769,7 +769,51 @@ public class Filters {
 	}
 
 	public static Image otsuThreshold(Image image) {
+		double maxValue = 0;
 		int threshold = 0;
+		int L = 256;
+
+		// get the histogram and probabilities of each gray level
+		int[] histogram = image.getHistogram(Image.CHANNEL_GRAY);
+		double[] proba = new double[L];
+		for (int i = 0; i < L; i++) {
+			proba[i] = histogram[i] / L;
+		}
+
+		// find the threshold that get the highest variance
+		for (int t = 0; t < L; t++) {
+			// compute the probabilities
+			double w1 = 0;
+			double w2 = 0;
+			for (int i = 0; i < L; i++) {
+				if (i <= t) {
+					w1 += proba[i];
+				} else {
+					w2 += proba[i];
+				}
+			}
+
+			// compute the means
+			double u1 = 0;
+			double u2 = 0;
+			for (int i = 0; i < L; i++) {
+				if (i <= t) {
+					u1 += ((i + 1) * proba[i]) / w1;
+				} else {
+					u2 += ((i + 1) * proba[i]) / w2;
+				}
+			}
+
+			// calculate sigma
+			double si = w1 * w2 * (u1 - u2) * (u1 - u2);
+
+			// update the threshold if necessary
+			if (maxValue < si) {
+				maxValue = si;
+				threshold = t;
+			}
+		}
+
 		return filterThreshold(image, threshold);
 	}
 
