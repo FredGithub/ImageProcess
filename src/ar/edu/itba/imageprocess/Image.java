@@ -153,6 +153,10 @@ public class Image {
 		for (int x = 0; x < mWidth; x++) {
 			for (int y = 0; y < mHeight; y++) {
 				int index = getChannelColor(x, y, channel) + bounds[0];
+				// temporary fix
+				if (index < 0) {
+					index = 0;
+				}
 				histogram[index]++;
 			}
 		}
