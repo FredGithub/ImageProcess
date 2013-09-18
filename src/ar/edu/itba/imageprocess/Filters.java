@@ -212,6 +212,10 @@ public class Filters {
 	}
 
 	public static Image filterThreshold(Image image, int threshold) {
+		return filterThreshold(image, threshold, threshold, threshold);
+	}
+
+	public static Image filterThreshold(Image image, int thresholdRed, int thresholdGreen, int thresholdBlue) {
 		// prepare the new image channel arrays
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -222,9 +226,9 @@ public class Filters {
 		// apply the threshold to each pixel
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				redChannel[x][y] = image.getRed(x, y) < threshold ? 0 : 255;
-				greenChannel[x][y] = image.getGreen(x, y) < threshold ? 0 : 255;
-				blueChannel[x][y] = image.getBlue(x, y) < threshold ? 0 : 255;
+				redChannel[x][y] = image.getRed(x, y) < thresholdRed ? 0 : 255;
+				greenChannel[x][y] = image.getGreen(x, y) < thresholdGreen ? 0 : 255;
+				blueChannel[x][y] = image.getBlue(x, y) < thresholdBlue ? 0 : 255;
 			}
 		}
 
@@ -661,13 +665,72 @@ public class Filters {
 		int[][] greenChannel = new int[width][height];
 		int[][] blueChannel = new int[width][height];
 
-		// build the masks
+		// apply the masks and get a temporary image out of it
 		double[][] mask = { { 0, -1, 0 }, { -1, 4, -1 }, { 0, -1, 0 } };
-		ArrayList<double[][]> masks = new ArrayList<double[][]>();
-		masks.add(mask);
+		applyFactorMask(image, mask, 1, redChannel, greenChannel, blueChannel);
+		Image tmpImage = new Image(redChannel, greenChannel, blueChannel);
+
+		// find the zero crossings
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				// get the previous value. if the pixel to the left of the current pixel is zero
+				// take the one even before
+				int prevVal = tmpImage.getRed(x - 1, y) != 0 ? tmpImage.getRed(x - 1, y) : tmpImage.getRed(x - 2, y);
+
+				// get the slope if there is a zero crossing
+				int slopeRed = 0;
+				if (tmpImage.getRed(x, y) > 0 && prevVal < 0 || tmpImage.getRed(x, y) < 0 && prevVal > 0) {
+					slopeRed = tmpImage.getRed(x, y) - prevVal;
+				}
+
+				// apply the pixel value based on the slope
+				if (Math.abs(slopeRed) > 0) {
+					redChannel[x][y] = 255;
+				} else {
+					redChannel[x][y] = 0;
+				}
+			}
+		}
+
+		return new Image(redChannel);
+	}
+
+	public static Image laplacianGaussianBorderDetection(Image image, int maskWidth, int maskHeight, double sigma) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// if the provided size for the mask is 0, we use automatic mask size
+		// based on spread parameter
+		if (maskWidth == 0 || maskHeight == 0) {
+			maskWidth = (int) (6 * sigma);
+			maskHeight = (int) (6 * sigma);
+		}
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// setup the mask and the factor
+		double[][] mask = new double[maskWidth][maskHeight];
+		double c = -1 / (Math.sqrt(2 * Math.PI) * sigma * sigma * sigma);
+
+		double total = 0;
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
+				double a = 2 - dist / (sigma * sigma);
+				double exp = Math.exp((-1 * dist) / (2 * sigma * sigma));
+				double val = c * a * exp;
+				mask[x][y] = val;
+				total += val;
+			}
+		}
+		double factor = 1 / total;
 
 		// apply the masks and get a temporary image out of it
-		applyFactorMask(image, mask, 1, redChannel, greenChannel, blueChannel);
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
 		Image tmpImage = new Image(redChannel, greenChannel, blueChannel);
 
 		// find the zero crossings
@@ -728,7 +791,7 @@ public class Filters {
 		return new Image(channels[0], channels[1], channels[2]);
 	}
 
-	public static Image globalThreshold(Image image, double delta) {
+	public static int globalThreshold(Image image, double delta) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int threshold = 128;
@@ -765,16 +828,16 @@ public class Filters {
 
 		Log.d("global threshold of " + threshold + " in " + iterations + " iterations");
 
-		return filterThreshold(image, threshold);
+		return threshold;
 	}
 
-	public static Image otsuThreshold(Image image) {
+	public static int otsuThreshold(Image image, int channel) {
 		double maxValue = 0;
 		int threshold = 0;
 		int L = 256;
 
 		// get the histogram and probabilities of each gray level
-		int[] histogram = image.getHistogram(Image.CHANNEL_GRAY);
+		int[] histogram = image.getHistogram(channel);
 		double[] proba = new double[L];
 		for (int i = 0; i < L; i++) {
 			proba[i] = histogram[i] / L;
@@ -814,7 +877,9 @@ public class Filters {
 			}
 		}
 
-		return filterThreshold(image, threshold);
+		Log.d("otsu threshold of " + threshold + " found");
+
+		return threshold;
 	}
 
 	private static double leclerc(double x, double sigma) {

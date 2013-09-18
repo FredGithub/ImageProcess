@@ -370,9 +370,9 @@ public class MainController {
 		}
 	}
 
-	public void laplacianGaussianBordersDetection() {
+	public void laplacianGaussianBordersDetection(int maskWidth, int maskHeight, double sigma) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.laplacianBorderDetection(mImagePaneSource.getImage());
+			Image image = Filters.laplacianGaussianBorderDetection(mImagePaneSource.getImage(), maskWidth, maskHeight, sigma);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
@@ -386,14 +386,26 @@ public class MainController {
 
 	public void globalThreshold(double delta) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.globalThreshold(mImagePaneSource.getImage(), delta);
+			int threshold = Filters.globalThreshold(mImagePaneSource.getImage(), delta);
+			Image image = Filters.filterThreshold(mImagePaneSource.getImage(), threshold);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
 	public void otsuThreshold() {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.otsuThreshold(mImagePaneSource.getImage());
+			int threshold = Filters.otsuThreshold(mImagePaneSource.getImage(), Image.CHANNEL_GRAY);
+			Image image = Filters.filterThreshold(mImagePaneSource.getImage(), threshold);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void otsuColorThreshold() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			int thresholdRed = Filters.otsuThreshold(mImagePaneSource.getImage(), Image.CHANNEL_RED);
+			int thresholdGreen = Filters.otsuThreshold(mImagePaneSource.getImage(), Image.CHANNEL_GREEN);
+			int thresholdBlue = Filters.otsuThreshold(mImagePaneSource.getImage(), Image.CHANNEL_BLUE);
+			Image image = Filters.filterThreshold(mImagePaneSource.getImage(), thresholdRed, thresholdGreen, thresholdBlue);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}

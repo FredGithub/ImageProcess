@@ -53,6 +53,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mFilterThreshold;
 	private JButton mGlobalThreshold;
 	private JButton mOtsuThreshold;
+	private JButton mOtsuColorThreshold;
 	private JButton mHistogramBtn;
 	private JButton mBlackAndWhiteBtn;
 	private JButton mContrastBtn;
@@ -186,6 +187,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mOtsuThreshold.addActionListener(this);
 		menuHistogram.add(mOtsuThreshold);
 
+		mOtsuColorThreshold = new JButton("Otsu color");
+		mOtsuColorThreshold.addActionListener(this);
+		menuHistogram.add(mOtsuColorThreshold);
+
 		mHistogramBtn = new JButton("Histogram");
 		mHistogramBtn.addActionListener(this);
 		menuHistogram.add(mHistogramBtn);
@@ -270,7 +275,7 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		mLaplacianLocalBorders = new JButton("Laplacian loc.");
 		mLaplacianLocalBorders.addActionListener(this);
-		menuBorders.add(mLaplacianLocalBorders);
+		//menuBorders.add(mLaplacianLocalBorders);
 
 		mLaplacianGaussianBorders = new JButton("Laplacian gau.");
 		mLaplacianGaussianBorders.addActionListener(this);
@@ -344,6 +349,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mOtsuThreshold) {
 			mController.otsuThreshold();
+		} else if (e.getSource() == mOtsuColorThreshold) {
+			mController.otsuColorThreshold();
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
 		} else if (e.getSource() == mBlackAndWhiteBtn) {
@@ -451,7 +458,13 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mLaplacianLocalBorders) {
 			mController.laplacianLocalBordersDetection();
 		} else if (e.getSource() == mLaplacianGaussianBorders) {
-			mController.laplacianGaussianBordersDetection();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "1"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", "7"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", "7"));
+			if (params.ask()) {
+				mController.laplacianGaussianBordersDetection(params.getInteger("width"), params.getInteger("height"), params.getDouble("sigma"));
+			}
 		} else if (e.getSource() == mAnisotropic) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_INTEGER, "steps", "20"));
