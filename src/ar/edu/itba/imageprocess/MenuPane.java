@@ -78,6 +78,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mLaplacianBorders;
 	private JButton mLaplacianLocalBorders;
 	private JButton mLaplacianGaussianBorders;
+	private JButton mIsotropic;
 	private JButton mAnisotropic;
 
 	// test menu
@@ -281,6 +282,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mLaplacianGaussianBorders.addActionListener(this);
 		menuBorders.add(mLaplacianGaussianBorders);
 
+		mIsotropic = new JButton("Isotropic");
+		mIsotropic.addActionListener(this);
+		menuBorders.add(mIsotropic);
+
 		mAnisotropic = new JButton("Anisotropic");
 		mAnisotropic.addActionListener(this);
 		menuBorders.add(mAnisotropic);
@@ -464,6 +469,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "height", "7"));
 			if (params.ask()) {
 				mController.laplacianGaussianBordersDetection(params.getInteger("width"), params.getInteger("height"), params.getDouble("sigma"));
+			}
+		} else if (e.getSource() == mIsotropic) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "1"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", "7"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", "7"));
+			if (params.ask()) {
+				mController.isotropicFilter(params.getInteger("width"), params.getInteger("height"), params.getDouble("sigma"));
 			}
 		} else if (e.getSource() == mAnisotropic) {
 			ParamAsker params = new ParamAsker();

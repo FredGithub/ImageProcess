@@ -758,6 +758,50 @@ public class Filters {
 		return new Image(redChannel);
 	}
 
+	public static Image isotropicFilter(Image image, int maskWidth, int maskHeight, double sigma) {
+		// prepare the new image channel arrays
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		// if the provided size for the mask is 0, we use automatic mask size
+		// based on spread parameter
+		if (maskWidth == 0 || maskHeight == 0) {
+			maskWidth = (int) (6 * sigma);
+			maskHeight = (int) (6 * sigma);
+		}
+
+		// get the position of the pixel at the center of the mask
+		// if one side has an even length, for example maskWidth = 8
+		// the center is considered to be 3 (the fourth column)
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// setup the mask and the factor
+		double[][] mask = new double[maskWidth][maskHeight];
+		double c = 1 / (4 * Math.PI * sigma);
+		double total = 0;
+
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
+				double exp = Math.exp((-1 * dist) / 4 * sigma);
+				double val = c * exp;
+				mask[x][y] = val;
+				total += val;
+			}
+		}
+		double factor = 1 / total;
+		factor = 1;
+
+		// apply the mask
+		applyFactorMask(image, mask, factor, redChannel, greenChannel, blueChannel);
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
 	public static Image anisotropicFilter(Image image, int steps, double sigma, int method) {
 		// prepare the new image gray channel
 		int width = image.getWidth();

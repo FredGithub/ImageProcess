@@ -377,6 +377,13 @@ public class MainController {
 		}
 	}
 
+	public void isotropicFilter(int maskWidth, int maskHeight, double sigma) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.isotropicFilter(mImagePaneSource.getImage(), maskWidth, maskHeight, sigma);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void anisotropicFilter(int steps, double sigma, int method) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.anisotropicFilter(mImagePaneSource.getImage(), steps, sigma, method);
