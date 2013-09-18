@@ -51,6 +51,8 @@ public class MenuPane extends JPanel implements ActionListener {
 	// histogram menu
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
+	private JButton mGlobalThreshold;
+	private JButton mOtsuThreshold;
 	private JButton mHistogramBtn;
 	private JButton mBlackAndWhiteBtn;
 	private JButton mContrastBtn;
@@ -75,6 +77,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mLaplacianBorders;
 	private JButton mLaplacianLocalBorders;
 	private JButton mLaplacianGaussianBorders;
+	private JButton mAnisotropic;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -165,7 +168,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		// histogram menu
 
 		JPanel menuHistogram = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		tabbedPane.addTab("Histogram", menuHistogram);
+		tabbedPane.addTab("Color process", menuHistogram);
 
 		mFilterNegative = new JButton("Negative");
 		mFilterNegative.addActionListener(this);
@@ -174,6 +177,14 @@ public class MenuPane extends JPanel implements ActionListener {
 		mFilterThreshold = new JButton("Threshold");
 		mFilterThreshold.addActionListener(this);
 		menuHistogram.add(mFilterThreshold);
+
+		mGlobalThreshold = new JButton("Global threshold");
+		mGlobalThreshold.addActionListener(this);
+		menuHistogram.add(mGlobalThreshold);
+
+		mOtsuThreshold = new JButton("Otsu");
+		mOtsuThreshold.addActionListener(this);
+		menuHistogram.add(mOtsuThreshold);
 
 		mHistogramBtn = new JButton("Histogram");
 		mHistogramBtn.addActionListener(this);
@@ -265,6 +276,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mLaplacianGaussianBorders.addActionListener(this);
 		menuBorders.add(mLaplacianGaussianBorders);
 
+		mAnisotropic = new JButton("Anisotropic");
+		mAnisotropic.addActionListener(this);
+		menuBorders.add(mAnisotropic);
+
 		// noise and mask menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -321,6 +336,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.filterThreshold(params.getInteger("threshold"));
 			}
+		} else if (e.getSource() == mGlobalThreshold) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "delta", 0, 100, "5"));
+			if (params.ask()) {
+				mController.globalThreshold(params.getDouble("delta"));
+			}
+		} else if (e.getSource() == mOtsuThreshold) {
+			mController.otsuThreshold();
 		} else if (e.getSource() == mHistogramBtn) {
 			mController.displayHistogram();
 		} else if (e.getSource() == mBlackAndWhiteBtn) {
@@ -429,6 +452,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			mController.laplacianLocalBordersDetection();
 		} else if (e.getSource() == mLaplacianGaussianBorders) {
 			mController.laplacianGaussianBordersDetection();
+		} else if (e.getSource() == mAnisotropic) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "steps", "20"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "3"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "method", 1, 2, "1"));
+			if (params.ask()) {
+				mController.anisotropicFilter(params.getInteger("steps"), params.getDouble("sigma"), params.getInteger("method"));
+			}
 		}
 	}
 

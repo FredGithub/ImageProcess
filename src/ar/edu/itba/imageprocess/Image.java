@@ -118,11 +118,11 @@ public class Image {
 		if (channel == CHANNEL_GRAY) {
 			return getGray(x, y);
 		} else if (channel == CHANNEL_RED) {
-			return mRedChannel[x][y];
+			return getRed(x, y);
 		} else if (channel == CHANNEL_GREEN) {
-			return mGreenChannel[x][y];
+			return getGreen(x, y);
 		} else if (channel == CHANNEL_BLUE) {
-			return mBlueChannel[x][y];
+			return getBlue(x, y);
 		} else {
 			return 0;
 		}

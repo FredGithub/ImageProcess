@@ -376,4 +376,25 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void anisotropicFilter(int steps, double sigma, int method) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.anisotropicFilter(mImagePaneSource.getImage(), steps, sigma, method);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void globalThreshold(double delta) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.globalThreshold(mImagePaneSource.getImage(), delta);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void otsuThreshold() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.otsuThreshold(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

@@ -695,6 +695,92 @@ public class Filters {
 		return new Image(redChannel);
 	}
 
+	public static Image anisotropicFilter(Image image, int steps, double sigma, int method) {
+		// prepare the new image gray channel
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][][] channels = new int[3][width][height];
+
+		// copy the original image
+		Image tmpImage = new Image(image.getRedChannel(), image.getGreenChannel(), image.getBlueChannel());
+
+		// perform the anisotropic filter
+		for (int i = 0; i < steps; i++) {
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					for (int channelIndex = 0; channelIndex < 3; channelIndex++) {
+						int channel = channelIndex == 0 ? Image.CHANNEL_RED : channelIndex == 1 ? Image.CHANNEL_GREEN : Image.CHANNEL_BLUE;
+						double dn = tmpImage.getChannelColor(x, y - 1, channel) - tmpImage.getChannelColor(x, y, channel);
+						double ds = tmpImage.getChannelColor(x, y + 1, channel) - tmpImage.getChannelColor(x, y, channel);
+						double de = tmpImage.getChannelColor(x - 1, y, channel) - tmpImage.getChannelColor(x, y, channel);
+						double dw = tmpImage.getChannelColor(x - 1, y, channel) - tmpImage.getChannelColor(x, y, channel);
+						double cn = method == 1 ? leclerc(dn, sigma) : lorentziano(dn, sigma);
+						double cs = method == 1 ? leclerc(ds, sigma) : lorentziano(ds, sigma);
+						double ce = method == 1 ? leclerc(de, sigma) : lorentziano(de, sigma);
+						double cw = method == 1 ? leclerc(dw, sigma) : lorentziano(dw, sigma);
+						channels[channelIndex][x][y] = (int) (tmpImage.getChannelColor(x, y, channel) + 0.25 * (dn * cn + ds * cs + de * ce + dw * cw));
+					}
+				}
+			}
+			tmpImage = new Image(channels[0], channels[1], channels[2]);
+		}
+
+		return new Image(channels[0], channels[1], channels[2]);
+	}
+
+	public static Image globalThreshold(Image image, double delta) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int threshold = 128;
+		boolean done = false;
+		int iterations = 0;
+
+		while (!done) {
+			iterations++;
+
+			Image tmpImage = filterThreshold(image, threshold);
+			double blackSum = 0;
+			int blackCount = 0;
+			double whiteSum = 0;
+			int whiteCount = 0;
+
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					if (tmpImage.getGray(x, y) == 0) {
+						blackSum += image.getGray(x, y);
+						blackCount++;
+					} else {
+						whiteSum += image.getGray(x, y);
+						whiteCount++;
+					}
+				}
+			}
+
+			int prevThreshold = threshold;
+			threshold = (int) ((blackSum / blackCount + whiteSum / whiteCount) / 2);
+			if (Math.abs(threshold - prevThreshold) < delta) {
+				done = true;
+			}
+		}
+
+		Log.d("global threshold of " + threshold + " in " + iterations + " iterations");
+
+		return filterThreshold(image, threshold);
+	}
+
+	public static Image otsuThreshold(Image image) {
+		int threshold = 0;
+		return filterThreshold(image, threshold);
+	}
+
+	private static double leclerc(double x, double sigma) {
+		return Math.exp((-1 * x * x) / (sigma * sigma));
+	}
+
+	private static double lorentziano(double x, double sigma) {
+		return 1 / (1 + (x * x) / (sigma * sigma));
+	}
+
 	/**
 	 * Used to find the correct output value for the equalization
 	 * 
