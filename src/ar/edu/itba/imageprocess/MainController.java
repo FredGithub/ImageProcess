@@ -356,23 +356,16 @@ public class MainController {
 		}
 	}
 
-	public void laplacianBordersDetection() {
+	public void laplacianBordersDetection(int threshold) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.laplacianBorderDetection(mImagePaneSource.getImage());
+			Image image = Filters.laplacianBorderDetection(mImagePaneSource.getImage(), threshold);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
 
-	public void laplacianLocalBordersDetection() {
+	public void laplacianGaussianBordersDetection(int maskWidth, int maskHeight, double sigma, int threshold) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.laplacianBorderDetection(mImagePaneSource.getImage());
-			mImagePaneDest.setImageWithHistory(image);
-		}
-	}
-
-	public void laplacianGaussianBordersDetection(int maskWidth, int maskHeight, double sigma) {
-		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.laplacianGaussianBorderDetection(mImagePaneSource.getImage(), maskWidth, maskHeight, sigma);
+			Image image = Filters.laplacianGaussianBorderDetection(mImagePaneSource.getImage(), maskWidth, maskHeight, sigma, threshold);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}

@@ -657,7 +657,7 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static Image laplacianBorderDetection(Image image) {
+	public static Image laplacianBorderDetection(Image image, int threshold) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -685,7 +685,7 @@ public class Filters {
 				}
 
 				// apply the pixel value based on the slope
-				if (Math.abs(slopeRed) > 30) {
+				if (Math.abs(slopeRed) > threshold) {
 					redChannel[x][y] = 255;
 				} else {
 					redChannel[x][y] = 0;
@@ -696,7 +696,7 @@ public class Filters {
 		return new Image(redChannel);
 	}
 
-	public static Image laplacianGaussianBorderDetection(Image image, int maskWidth, int maskHeight, double sigma) {
+	public static Image laplacianGaussianBorderDetection(Image image, int maskWidth, int maskHeight, double sigma, int threshold) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -749,7 +749,7 @@ public class Filters {
 				}
 
 				// apply the pixel value based on the slope
-				if (Math.abs(slopeRed) > 0) {
+				if (Math.abs(slopeRed) > threshold) {
 					redChannel[x][y] = 255;
 				} else {
 					redChannel[x][y] = 0;

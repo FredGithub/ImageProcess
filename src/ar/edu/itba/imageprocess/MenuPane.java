@@ -76,7 +76,6 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mSimpleBorders;
 	private JButton mKirshBorders;
 	private JButton mLaplacianBorders;
-	private JButton mLaplacianLocalBorders;
 	private JButton mLaplacianGaussianBorders;
 	private JButton mIsotropic;
 	private JButton mAnisotropic;
@@ -274,10 +273,6 @@ public class MenuPane extends JPanel implements ActionListener {
 		mLaplacianBorders.addActionListener(this);
 		menuBorders.add(mLaplacianBorders);
 
-		mLaplacianLocalBorders = new JButton("Laplacian loc.");
-		mLaplacianLocalBorders.addActionListener(this);
-		//menuBorders.add(mLaplacianLocalBorders);
-
 		mLaplacianGaussianBorders = new JButton("Laplacian gau.");
 		mLaplacianGaussianBorders.addActionListener(this);
 		menuBorders.add(mLaplacianGaussianBorders);
@@ -459,16 +454,19 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mKirshBorders) {
 			mController.kirshBordersDetection();
 		} else if (e.getSource() == mLaplacianBorders) {
-			mController.laplacianBordersDetection();
-		} else if (e.getSource() == mLaplacianLocalBorders) {
-			mController.laplacianLocalBordersDetection();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "30"));
+			if (params.ask()) {
+				mController.laplacianBordersDetection(params.getInteger("threshold"));
+			}
 		} else if (e.getSource() == mLaplacianGaussianBorders) {
 			ParamAsker params = new ParamAsker();
-			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "1"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "width", "7"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "height", "7"));
+			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "2"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "width", "13"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "height", "13"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "30"));
 			if (params.ask()) {
-				mController.laplacianGaussianBordersDetection(params.getInteger("width"), params.getInteger("height"), params.getDouble("sigma"));
+				mController.laplacianGaussianBordersDetection(params.getInteger("width"), params.getInteger("height"), params.getDouble("sigma"), params.getInteger("threshold"));
 			}
 		} else if (e.getSource() == mIsotropic) {
 			ParamAsker params = new ParamAsker();
