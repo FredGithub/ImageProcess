@@ -21,9 +21,5 @@ enfin, combiner les 4 images (sintesis de caracteristicas)
 avec un OR ou un AND
 
 
-para el TP final 
-peut choisir la tranformation de haugh generalisee
-
-
 TODO
 detecteur de bords dans dautres directions

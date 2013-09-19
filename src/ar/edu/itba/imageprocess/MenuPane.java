@@ -80,6 +80,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mIsotropic;
 	private JButton mAnisotropic;
 
+	// borders 2 menu
+	private JButton mNonMaximum;
+
 	// test menu
 	private JButton mGaussianTest;
 	private JButton mRayleighTest;
@@ -285,7 +288,16 @@ public class MenuPane extends JPanel implements ActionListener {
 		mAnisotropic.addActionListener(this);
 		menuBorders.add(mAnisotropic);
 
-		// noise and mask menu
+		// borders 2 menu
+
+		JPanel menuBorders2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Borders 2", menuBorders2);
+
+		mNonMaximum = new JButton("Non maximum");
+		mNonMaximum.addActionListener(this);
+		menuBorders2.add(mNonMaximum);
+
+		// test menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		tabbedPane.addTab("Tests", menuTest);
@@ -484,6 +496,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.anisotropicFilter(params.getInteger("steps"), params.getDouble("sigma"), params.getInteger("method"));
 			}
+		} else if (e.getSource() == mNonMaximum) {
+			mController.nonMaximum();
 		}
 	}
 

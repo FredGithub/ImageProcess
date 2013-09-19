@@ -928,6 +928,22 @@ public class Filters {
 		return threshold;
 	}
 
+	public static Image nonMaximum(Image image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		// get the gradients
+		double[][] maskX = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+		double[][] maskY = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+		int[][] gradientX = grayGradient(image, maskX);
+		int[][] gradientY = grayGradient(image, maskY);
+
+		// get the angles
+		int[][] angles = new int[width][height];
+
+		return new Image(gradientX);
+	}
+
 	private static double leclerc(double x, double sigma) {
 		return Math.exp((-1 * x * x) / (sigma * sigma));
 	}
@@ -1034,5 +1050,29 @@ public class Filters {
 				blueChannel[pixelX][pixelY] = (int) Math.min(255, Math.max(0, Math.sqrt(totalBlueSum)));
 			}
 		}
+	}
+
+	private static int[][] grayGradient(Image image, double[][] mask) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int maskWidth = mask.length;
+		int maskHeight = mask[0].length;
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+		int[][] gradient = new int[width][height];
+
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				double sum = 0;
+				for (int x = 0; x < maskWidth; x++) {
+					for (int y = 0; y < maskHeight; y++) {
+						sum += mask[x][y] * image.getGray(pixelX - offsetX + x, pixelY - offsetY + y);
+					}
+				}
+				gradient[pixelX][pixelY] = (int) sum;
+			}
+		}
+
+		return gradient;
 	}
 }
