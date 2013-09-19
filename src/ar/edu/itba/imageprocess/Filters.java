@@ -301,7 +301,7 @@ public class Filters {
 		return new Image(grayChannel);
 	}
 
-	public static Image applyAddGaussianNoise(Image image, double spread, double average, double percentage) {
+	public static Image applyAddGaussianNoise(Image image, double sigma, double average, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -313,7 +313,7 @@ public class Filters {
 			for (int y = 0; y < height; y++) {
 				double rand = Math.random();
 				if (rand <= percentage) {
-					newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(spread, average));
+					newGrayChannel[x][y] = grayChannel[x][y] + (int) (RandGenerator.gaussian(sigma, average));
 				} else {
 					newGrayChannel[x][y] = grayChannel[x][y];
 				}
@@ -367,12 +367,12 @@ public class Filters {
 		return new Image(newGrayChannel);
 	}
 
-	public static Image generateGaussianChartImage(double spread, double average) {
+	public static Image generateGaussianChartImage(double sigma, double average) {
 		// generate test data and create a chart out of it
 		int size = 5000;
 		double data[] = new double[size];
 		for (int i = 0; i < size; i++) {
-			data[i] = RandGenerator.gaussian(spread, average);
+			data[i] = RandGenerator.gaussian(sigma, average);
 		}
 		return new Image(ChartUtils.createHistogramChartImage(CHART_WIDTH, CHART_HEIGHT, data, 100));
 	}
@@ -471,7 +471,7 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static Image applyGaussianMaskFilter(Image image, int maskWidth, int maskHeight, double spread) {
+	public static Image applyGaussianMaskFilter(Image image, int maskWidth, int maskHeight, double sigma) {
 		// prepare the new image channel arrays
 		int width = image.getWidth();
 		int height = image.getHeight();
@@ -480,10 +480,10 @@ public class Filters {
 		int[][] blueChannel = new int[width][height];
 
 		// if the provided size for the mask is 0, we use automatic mask size
-		// based on spread parameter
+		// based on sigma
 		if (maskWidth == 0 || maskHeight == 0) {
-			maskWidth = (int) (6 * spread);
-			maskHeight = (int) (6 * spread);
+			maskWidth = maskSize(sigma);
+			maskHeight = maskWidth;
 		}
 
 		// get the position of the pixel at the center of the mask
@@ -494,14 +494,14 @@ public class Filters {
 
 		// setup the mask and the factor
 		double[][] mask = new double[maskWidth][maskHeight];
-		double spread2 = spread * spread;
-		double factor = 1.0 / (2 * Math.PI * spread2);
+		double sigma2 = sigma * sigma;
+		double factor = 1.0 / (2 * Math.PI * sigma2);
 
 		double total = 0;
 		for (int x = 0; x < maskWidth; x++) {
 			for (int y = 0; y < maskHeight; y++) {
 				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
-				double exp = Math.exp((-1 * dist) / spread2);
+				double exp = Math.exp((-1 * dist) / sigma2);
 				mask[x][y] = exp;
 				total += exp;
 			}
@@ -673,7 +673,8 @@ public class Filters {
 		// find the zero crossings
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				// get the previous value. if the pixel to the left of the current pixel is zero
+				// get the previous value. if the pixel to the left of the
+				// current pixel is zero
 				// take the one even before
 				int prevVal = tmpImage.getRed(x - 1, y) != 0 ? tmpImage.getRed(x - 1, y) : tmpImage.getRed(x - 2, y);
 
@@ -684,7 +685,7 @@ public class Filters {
 				}
 
 				// apply the pixel value based on the slope
-				if (Math.abs(slopeRed) > 0) {
+				if (Math.abs(slopeRed) > 30) {
 					redChannel[x][y] = 255;
 				} else {
 					redChannel[x][y] = 0;
@@ -704,10 +705,10 @@ public class Filters {
 		int[][] blueChannel = new int[width][height];
 
 		// if the provided size for the mask is 0, we use automatic mask size
-		// based on spread parameter
+		// based on sigma
 		if (maskWidth == 0 || maskHeight == 0) {
-			maskWidth = (int) (6 * sigma);
-			maskHeight = (int) (6 * sigma);
+			maskWidth = maskSize(sigma);
+			maskHeight = maskWidth;
 		}
 		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
 		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
@@ -736,7 +737,8 @@ public class Filters {
 		// find the zero crossings
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				// get the previous value. if the pixel to the left of the current pixel is zero
+				// get the previous value. if the pixel to the left of the
+				// current pixel is zero
 				// take the one even before
 				int prevVal = tmpImage.getRed(x - 1, y) != 0 ? tmpImage.getRed(x - 1, y) : tmpImage.getRed(x - 2, y);
 
@@ -767,10 +769,10 @@ public class Filters {
 		int[][] blueChannel = new int[width][height];
 
 		// if the provided size for the mask is 0, we use automatic mask size
-		// based on spread parameter
+		// based on sigma
 		if (maskWidth == 0 || maskHeight == 0) {
-			maskWidth = (int) (6 * sigma);
-			maskHeight = (int) (6 * sigma);
+			maskWidth = maskSize(sigma);
+			maskHeight = maskWidth;
 		}
 
 		// get the position of the pixel at the center of the mask
@@ -932,6 +934,14 @@ public class Filters {
 
 	private static double lorentziano(double x, double sigma) {
 		return 1 / (1 + (x * x) / (sigma * sigma));
+	}
+
+	private static int maskSize(double sigma) {
+		int size = (int) (3 * sigma);
+		if (size % 2 == 0) {
+			size++;
+		}
+		return size;
 	}
 
 	/**
