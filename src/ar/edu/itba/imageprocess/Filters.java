@@ -972,6 +972,32 @@ public class Filters {
 		return compressLinear(new Image(newG));
 	}
 
+	public static Image histeresisThreshold(Image image, int thresholdLow, int thresholdHigh) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] newGrayChannel = new int[width][height];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (image.getGray(x, y) < thresholdLow) {
+					newGrayChannel[x][y] = 0;
+				} else if (image.getGray(x, y) > thresholdHigh) {
+					newGrayChannel[x][y] = 255;
+				} else {
+					boolean borderLeft = image.getGray(x - 1, y) > thresholdHigh;
+					boolean borderRight = image.getGray(x + 1, y) > thresholdHigh;
+					boolean borderTop = image.getGray(x, y - 1) > thresholdHigh;
+					boolean borderBottom = image.getGray(x, y + 1) > thresholdHigh;
+					if (borderLeft || borderRight || borderTop || borderBottom) {
+						newGrayChannel[x][y] = 255;
+					}
+				}
+			}
+		}
+
+		return new Image(newGrayChannel);
+	}
+
 	private static int toDiscreteAngle(double angle) {
 		if (angle < 22.5) {
 			return 0;

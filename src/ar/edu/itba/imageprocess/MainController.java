@@ -416,4 +416,11 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void histeresisThreshold(int thresholdLow, int thresholdHigh) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.histeresisThreshold(mImagePaneSource.getImage(), thresholdLow, thresholdHigh);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

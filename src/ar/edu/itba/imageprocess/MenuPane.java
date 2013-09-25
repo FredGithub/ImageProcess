@@ -82,6 +82,7 @@ public class MenuPane extends JPanel implements ActionListener {
 
 	// borders 2 menu
 	private JButton mNonMaximum;
+	private JButton mHisteresis;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -297,6 +298,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mNonMaximum.addActionListener(this);
 		menuBorders2.add(mNonMaximum);
 
+		mHisteresis = new JButton("Histeresis");
+		mHisteresis.addActionListener(this);
+		menuBorders2.add(mHisteresis);
+
 		// test menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -498,6 +503,13 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mNonMaximum) {
 			mController.nonMaximum();
+		} else if (e.getSource() == mHisteresis) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "thresholdLow", "32"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "thresholdHigh", "64"));
+			if (params.ask()) {
+				mController.histeresisThreshold(params.getInteger("thresholdLow"), params.getInteger("thresholdHigh"));
+			}
 		}
 	}
 
