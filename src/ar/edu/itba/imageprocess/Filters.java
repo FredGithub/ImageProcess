@@ -998,6 +998,48 @@ public class Filters {
 		return new Image(newGrayChannel);
 	}
 
+	public static Image susan(Image image, int threshold) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+		int halfSize = 3;
+
+		// apply the mask to each pixel
+		for (int pixelX = 0; pixelX < width; pixelX++) {
+			for (int pixelY = 0; pixelY < height; pixelY++) {
+				int sum = 0;
+				int maskSize = 0;
+
+				// run through the circle mask
+				for (int y = -halfSize; y <= halfSize; y++) {
+					for (int x = -halfSize; x <= halfSize; x++) {
+						maskSize++;
+						double dist2 = x * x + y * y;
+						// if we are not at the center and inside the circle
+						if (dist2 > 0 && dist2 * 0.8 < halfSize * halfSize) {
+							int diff = Math.abs(image.getGray(pixelX, pixelY) - image.getGray(pixelX + x, pixelY + y));
+							if (diff < threshold) {
+								sum++;
+							}
+						}
+					}
+				}
+
+				// add the border
+				double s = 1 - (double) sum / maskSize;
+				if (s > 0.75) {
+					greenChannel[pixelX][pixelY] = 255;
+				} else if (s > 0.5) {
+					blueChannel[pixelX][pixelY] = 255;
+				}
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
+	}
+
 	private static int toDiscreteAngle(double angle) {
 		if (angle < 22.5) {
 			return 0;

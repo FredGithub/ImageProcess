@@ -423,4 +423,11 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void susan(int threshold) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.susan(mImagePaneSource.getImage(), threshold);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }
