@@ -932,16 +932,64 @@ public class Filters {
 		int width = image.getWidth();
 		int height = image.getHeight();
 
-		// get the gradients
-		double[][] maskX = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
-		double[][] maskY = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
-		int[][] gradientX = grayGradient(image, maskX);
-		int[][] gradientY = grayGradient(image, maskY);
+		// get the gradients X and Y
+		double[][] maskX = { { -1, -2, -1 }, { 0, 0, 0 }, { 1, 2, 1 } };
+		double[][] maskY = { { -1, 0, 1 }, { -2, 0, 2 }, { -1, 0, 1 } };
+		int[][] gx = grayGradient(image, maskX);
+		int[][] gy = grayGradient(image, maskY);
 
-		// get the angles
+		// get the angles and the gradient
 		int[][] angles = new int[width][height];
+		int[][] g = new int[width][height];
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				double angle = 0;
+				if (gx[x][y] != 0) {
+					angle = Math.atan2(gy[x][y], gx[x][y]) * 180 / Math.PI;
+				}
+				angle = (angle + 180) % 180;
+				angles[x][y] = toDiscreteAngle(angle);
+				g[x][y] = (int) Math.sqrt(gx[x][y] * gx[x][y] + gy[x][y] * gy[x][y]);
+			}
+		}
 
-		return new Image(gradientX);
+		// remove the non maximum
+		int[][] newG = new int[width][height];
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				int moveX = angles[x][y] == 90 ? 0 : angles[x][y] == 135 ? -1 : 1;
+				int moveY = angles[x][y] == 0 ? 0 : 1;
+				int adj1 = getValueInBounds(g, x + moveX, y + moveY);
+				int adj2 = getValueInBounds(g, x - moveX, y - moveY);
+				if (adj1 > g[x][y] || adj2 > g[x][y]) {
+					newG[x][y] = 0;
+				} else {
+					newG[x][y] = g[x][y];
+				}
+			}
+		}
+
+		return compressLinear(new Image(newG));
+	}
+
+	private static int toDiscreteAngle(double angle) {
+		if (angle < 22.5) {
+			return 0;
+		} else if (angle < 67.5) {
+			return 45;
+		} else if (angle < 112.5) {
+			return 90;
+		} else if (angle < 157.5) {
+			return 135;
+		} else {
+			return 0;
+		}
+	}
+
+	private static int getValueInBounds(int[][] array, int x, int y) {
+		x = Math.max(0, Math.min(array.length - 1, x));
+		y = Math.max(0, Math.min(array[x].length - 1, y));
+		return array[x][y];
 	}
 
 	private static double leclerc(double x, double sigma) {
