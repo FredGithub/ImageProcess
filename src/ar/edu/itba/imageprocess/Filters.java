@@ -2,11 +2,14 @@ package ar.edu.itba.imageprocess;
 
 import java.awt.Color;
 import java.awt.GradientPaint;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.TreeMap;
 
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ChartUtils;
@@ -1046,48 +1049,46 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static ArrayList<double[]> getHoughLines(Image image) {
+	public static ArrayList<double[]> getHoughLines(Image image, int angleCount, int distCount, int amount) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 
-		int numSteps = 10;
 		double angleRange = Math.PI / 2;
-		double angleStep = (angleRange * 2) / (numSteps - 1);
+		double angleStep = (angleRange * 2) / (angleCount - 1);
 		double distRange = Math.sqrt(2) * Math.max(width, height);
-		double distStep = (distRange * 2) / (numSteps - 1);
-		int[][] votes = new int[numSteps][numSteps];
+		double distStep = (distRange * 2) / (distCount - 1);
+		int[][] votes = new int[angleCount][distCount];
+		TreeMap<Integer, double[]> orderedLines = new TreeMap<Integer, double[]>();
 		int maxVotes = 0;
 
 		// get the votes for each line
-		for (int angleIter = 0; angleIter < numSteps; angleIter++) {
+		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
 			double angle = -angleRange + angleIter * angleStep;
-			for (int distIter = 0; distIter < numSteps; distIter++) {
+			for (int distIter = 0; distIter < distCount; distIter++) {
 				double dist = -distRange + distIter * distStep;
-				votes[angleIter][distIter] = getHoughVotes(image, angle, dist);
+				int val = getHoughVotes(image, angle, dist);
+				votes[angleIter][distIter] = val;
+				orderedLines.put(val, new double[] { angle, dist });
 
 				// store the max vote count
-				if (votes[angleIter][distIter] > maxVotes) {
-					maxVotes = votes[angleIter][distIter];
+				if (val > maxVotes) {
+					maxVotes = val;
 				}
 			}
 		}
 
-		// get the most voted lines
+		// get the first lines
 		ArrayList<double[]> lines = new ArrayList<double[]>();
-		for (int angleIter = 0; angleIter < numSteps; angleIter++) {
-			for (int distIter = 0; distIter < numSteps; distIter++) {
-				if (votes[angleIter][distIter] >= maxVotes * 0) {
-					double angle = -angleRange + angleIter * angleStep;
-					double dist = -distRange + distIter * distStep;
-					lines.add(new double[] { angle, dist });
-				}
-			}
+		Iterator<Integer> it = orderedLines.descendingKeySet().iterator();
+		while (it.hasNext() && lines.size() < amount) {
+			Integer key = it.next();
+			lines.add(orderedLines.get(key));
 		}
 
 		return lines;
 	}
 
-	public static void drawLineNormal(BufferedImage image, double angle, double dist) {
+	public static void drawLineNormal(Graphics g, double angle, double dist) {
 		double x = Math.cos(angle) * dist;
 		double y = Math.sin(angle) * dist;
 		double len = Math.sqrt(x * x + y * y);
@@ -1095,16 +1096,28 @@ public class Filters {
 		double dirY = y / len;
 		double norX = dirY;
 		double norY = -dirX;
-		image.getGraphics().setColor(Color.WHITE);
-		image.getGraphics().drawLine((int) (x - norX * 10000), (int) (y - norY * 10000), (int) (x + norX * 10000), (int) (y + norY * 10000));
+		double x1 = x - norX * 10000;
+		double y1 = y - norY * 10000;
+		double x2 = x + norX * 10000;
+		double y2 = y + norY * 10000;
+		g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 	}
 
-	public static Image houghLines(Image image) {
-		BufferedImage bufferedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-		ArrayList<double[]> lines = getHoughLines(image);
+	public static Image houghLines(Image image, int angleCount, int distCount, int amount) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		// create the buffered image
+		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics g = bufferedImage.getGraphics();
+		g.setColor(Color.GREEN);
+
+		// get the hough lines and draw them
+		ArrayList<double[]> lines = getHoughLines(image, angleCount, distCount, amount);
 		for (double[] line : lines) {
-			drawLineNormal(bufferedImage, line[0], line[1]);
+			drawLineNormal(g, line[0], line[1]);
 		}
+
 		return new Image(bufferedImage);
 	}
 

@@ -540,7 +540,13 @@ public class MenuPane extends JPanel implements ActionListener {
 				mController.susan(params.getInteger("threshold"));
 			}
 		} else if (e.getSource() == mHoughLines) {
-			mController.houghLines();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "angleCount", "64"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "distCount", "64"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "amount", "4"));
+			if (params.ask()) {
+				mController.houghLines(params.getInteger("angleCount"), params.getInteger("distCount"), params.getInteger("amount"));
+			}
 		}
 	}
 

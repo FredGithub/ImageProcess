@@ -438,9 +438,9 @@ public class MainController {
 		}
 	}
 
-	public void houghLines() {
+	public void houghLines(int angleCount, int distCount, int amount) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.houghLines(mImagePaneSource.getImage());
+			Image image = Filters.houghLines(mImagePaneSource.getImage(), angleCount, distCount, amount);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
