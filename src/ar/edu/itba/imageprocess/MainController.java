@@ -437,4 +437,11 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void houghLines() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.houghLines(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

@@ -1046,6 +1046,88 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
+	public static ArrayList<double[]> getHoughLines(Image image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		int numSteps = 10;
+		double angleRange = Math.PI / 2;
+		double angleStep = (angleRange * 2) / (numSteps - 1);
+		double distRange = Math.sqrt(2) * Math.max(width, height);
+		double distStep = (distRange * 2) / (numSteps - 1);
+		int[][] votes = new int[numSteps][numSteps];
+		int maxVotes = 0;
+
+		// get the votes for each line
+		for (int angleIter = 0; angleIter < numSteps; angleIter++) {
+			double angle = -angleRange + angleIter * angleStep;
+			for (int distIter = 0; distIter < numSteps; distIter++) {
+				double dist = -distRange + distIter * distStep;
+				votes[angleIter][distIter] = getHoughVotes(image, angle, dist);
+
+				// store the max vote count
+				if (votes[angleIter][distIter] > maxVotes) {
+					maxVotes = votes[angleIter][distIter];
+				}
+			}
+		}
+
+		// get the most voted lines
+		ArrayList<double[]> lines = new ArrayList<double[]>();
+		for (int angleIter = 0; angleIter < numSteps; angleIter++) {
+			for (int distIter = 0; distIter < numSteps; distIter++) {
+				if (votes[angleIter][distIter] >= maxVotes * 0) {
+					double angle = -angleRange + angleIter * angleStep;
+					double dist = -distRange + distIter * distStep;
+					lines.add(new double[] { angle, dist });
+				}
+			}
+		}
+
+		return lines;
+	}
+
+	public static void drawLineNormal(BufferedImage image, double angle, double dist) {
+		double x = Math.cos(angle) * dist;
+		double y = Math.sin(angle) * dist;
+		double len = Math.sqrt(x * x + y * y);
+		double dirX = x / len;
+		double dirY = y / len;
+		double norX = dirY;
+		double norY = -dirX;
+		image.getGraphics().setColor(Color.WHITE);
+		image.getGraphics().drawLine((int) (x - norX * 10000), (int) (y - norY * 10000), (int) (x + norX * 10000), (int) (y + norY * 10000));
+	}
+
+	public static Image houghLines(Image image) {
+		BufferedImage bufferedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+		ArrayList<double[]> lines = getHoughLines(image);
+		for (double[] line : lines) {
+			drawLineNormal(bufferedImage, line[0], line[1]);
+		}
+		return new Image(bufferedImage);
+	}
+
+	private static int getHoughVotes(Image image, double angle, double dist) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int threshold = 128;
+		double epsilon = 1;
+		int votes = 0;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (image.getGray(x, y) >= threshold) {
+					if (Math.abs(dist - x * Math.cos(angle) - y * Math.sin(angle)) < epsilon) {
+						votes++;
+					}
+				}
+			}
+		}
+
+		return votes;
+	}
+
 	private static int toDiscreteAngle(double angle) {
 		if (angle < 22.5) {
 			return 0;
