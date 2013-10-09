@@ -998,6 +998,12 @@ public class Filters {
 		return new Image(newGrayChannel);
 	}
 
+	public static Image canny(Image image, double sigma, int thresholdLow, int thresholdHigh) {
+		Image blurred = applyGaussianMaskFilter(image, 0, 0, sigma);
+		Image detected = histeresisThreshold(nonMaximum(blurred), thresholdLow, thresholdHigh);
+		return detected;
+	}
+
 	public static Image susan(Image image, int threshold) {
 		int width = image.getWidth();
 		int height = image.getHeight();

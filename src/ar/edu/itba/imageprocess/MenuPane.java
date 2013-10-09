@@ -83,6 +83,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	// borders 2 menu
 	private JButton mNonMaximum;
 	private JButton mHisteresis;
+	private JButton mCanny;
 	private JButton mSusan;
 
 	// test menu
@@ -303,6 +304,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHisteresis.addActionListener(this);
 		menuBorders2.add(mHisteresis);
 
+		mCanny = new JButton("Canny");
+		mCanny.addActionListener(this);
+		menuBorders2.add(mCanny);
+
 		mSusan = new JButton("SUSAN");
 		mSusan.addActionListener(this);
 		menuBorders2.add(mSusan);
@@ -514,6 +519,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "thresholdHigh", "64"));
 			if (params.ask()) {
 				mController.histeresisThreshold(params.getInteger("thresholdLow"), params.getInteger("thresholdHigh"));
+			}
+		} else if (e.getSource() == mCanny) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "sigma", "1.5"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "thresholdLow", "32"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "thresholdHigh", "64"));
+			if (params.ask()) {
+				mController.canny(params.getDouble("sigma"), params.getInteger("thresholdLow"), params.getInteger("thresholdHigh"));
 			}
 		} else if (e.getSource() == mSusan) {
 			ParamAsker params = new ParamAsker();

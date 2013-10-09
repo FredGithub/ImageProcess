@@ -424,6 +424,13 @@ public class MainController {
 		}
 	}
 
+	public void canny(double sigma, int thresholdLow, int thresholdHigh) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.canny(mImagePaneSource.getImage(), sigma, thresholdLow, thresholdHigh);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void susan(int threshold) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.susan(mImagePaneSource.getImage(), threshold);
