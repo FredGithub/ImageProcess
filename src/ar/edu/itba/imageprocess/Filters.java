@@ -1052,15 +1052,15 @@ public class Filters {
 	public static ArrayList<double[]> getHoughLines(Image image, int angleCount, int distCount, int amount) {
 		int width = image.getWidth();
 		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
 
 		double angleRange = Math.PI / 2;
 		double angleStep = (angleRange * 2) / (angleCount - 1);
-		double distRange = Math.max(width, height);
+		double distRange = Math.sqrt(2) * Math.max(width, height);
 		double distStep = (distRange * 2) / (distCount - 1);
 		int[][] votes = new int[angleCount][distCount];
 		TreeMap<Integer, double[]> orderedLines = new TreeMap<Integer, double[]>();
 		int maxVotes = 0;
-		double prevAngle = 0;
 
 		// get the votes for each line
 		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
@@ -1073,7 +1073,7 @@ public class Filters {
 
 			for (int distIter = 0; distIter < distCount; distIter++) {
 				double dist = -distRange + distIter * distStep;
-				int val = getHoughVotes(image, angle, dist);
+				int val = getHoughVotes(grayChannel, angle, dist);
 				votes[angleIter][distIter] = val;
 				orderedLines.put(val, new double[] { angle, dist });
 
@@ -1128,17 +1128,18 @@ public class Filters {
 		return new Image(bufferedImage);
 	}
 
-	private static int getHoughVotes(Image image, double angle, double dist) {
-		int width = image.getWidth();
-		int height = image.getHeight();
-		int threshold = 128;
-		double epsilon = 2;
+	private static int getHoughVotes(int[][] channel, double angle, double dist) {
+		int width = channel.length;
+		int height = channel[0].length;
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
+		double epsilon = 1;
 		int votes = 0;
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
-				if (image.getGray(x, y) >= threshold) {
-					if (Math.abs(dist - x * Math.cos(angle) - y * Math.sin(angle)) < epsilon) {
+				if (channel[x][y] >= 128) {
+					if (Math.abs(dist - x * cos - y * sin) < epsilon) {
 						votes++;
 					}
 				}
