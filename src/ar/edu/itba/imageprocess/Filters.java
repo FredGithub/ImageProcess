@@ -1060,7 +1060,6 @@ public class Filters {
 		double distStep = (distRange * 2) / (distCount - 1);
 		int[][] votes = new int[angleCount][distCount];
 		TreeMap<Integer, double[]> orderedLines = new TreeMap<Integer, double[]>();
-		int maxVotes = 0;
 
 		// get the votes for each line
 		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
@@ -1076,11 +1075,6 @@ public class Filters {
 				int val = getHoughVotes(grayChannel, angle, dist);
 				votes[angleIter][distIter] = val;
 				orderedLines.put(val, new double[] { angle, dist });
-
-				// store the max vote count
-				if (val > maxVotes) {
-					maxVotes = val;
-				}
 			}
 		}
 
