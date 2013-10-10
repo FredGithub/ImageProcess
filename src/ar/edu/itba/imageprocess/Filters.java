@@ -1055,15 +1055,22 @@ public class Filters {
 
 		double angleRange = Math.PI / 2;
 		double angleStep = (angleRange * 2) / (angleCount - 1);
-		double distRange = Math.sqrt(2) * Math.max(width, height);
+		double distRange = Math.max(width, height);
 		double distStep = (distRange * 2) / (distCount - 1);
 		int[][] votes = new int[angleCount][distCount];
 		TreeMap<Integer, double[]> orderedLines = new TreeMap<Integer, double[]>();
 		int maxVotes = 0;
+		double prevAngle = 0;
 
 		// get the votes for each line
 		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
 			double angle = -angleRange + angleIter * angleStep;
+			Log.d("progress " + (100.0 * (angleIter + 1) / angleCount) + "%");
+			if (angle == Math.PI || angle == 0)
+				Log.d("hor");
+			if (angle == Math.PI / 2)
+				Log.d("ver");
+
 			for (int distIter = 0; distIter < distCount; distIter++) {
 				double dist = -distRange + distIter * distStep;
 				int val = getHoughVotes(image, angle, dist);
@@ -1125,7 +1132,7 @@ public class Filters {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int threshold = 128;
-		double epsilon = 1;
+		double epsilon = 2;
 		int votes = 0;
 
 		for (int x = 0; x < width; x++) {
