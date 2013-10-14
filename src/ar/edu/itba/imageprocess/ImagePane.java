@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -18,7 +20,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import ar.edu.itba.imageprocess.utils.Log;
-import ar.edu.itba.imageprocess.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ImagePane extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
@@ -34,6 +35,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	private int mHistoryIndex;
 	private boolean mSource;
 	private boolean mDest;
+	private Rectangle mRect;
+	private Point mStartPoint;
 	private JPanel mImagePane;
 	private JLabel mImageLabel;
 	private JButton mPrevBtn;
@@ -41,6 +44,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 	private JButton mClearBtn;
 	private JLabel mRangeLabel;
 	private JLabel mPixelLabel;
+	private JLabel mRectLabel;
 
 	public ImagePane(MainController controller, int index) {
 		super(new GridBagLayout());
@@ -52,7 +56,8 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mHistoryIndex = -1;
 		mSource = false;
 		mDest = false;
-
+		mRect = new Rectangle();
+		mStartPoint = new Point();
 		GridBagConstraints c;
 
 		mImagePane = new JPanel(new GridBagLayout());
@@ -99,9 +104,9 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		c.gridy = 1;
 		c.insets = new Insets(8, 0, 0, 8);
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
-		add(mClearBtn, c);
+		//add(mClearBtn, c);
 
-		mRangeLabel = new JLabel("[0, 0]");
+		mRangeLabel = new JLabel();
 		mRangeLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		c = new GridBagConstraints();
 		c.gridx = 3;
@@ -110,14 +115,23 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		c.anchor = GridBagConstraints.LINE_START;
 		add(mRangeLabel, c);
 
-		mPixelLabel = new JLabel("R=0 G=0 B=0");
+		mPixelLabel = new JLabel();
 		mPixelLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		c = new GridBagConstraints();
 		c.gridx = 4;
 		c.gridy = 1;
-		c.insets = new Insets(8, 0, 0, 0);
+		c.insets = new Insets(8, 0, 0, 8);
 		c.anchor = GridBagConstraints.LINE_START;
 		add(mPixelLabel, c);
+
+		mRectLabel = new JLabel();
+		mRectLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		c = new GridBagConstraints();
+		c.gridx = 5;
+		c.gridy = 1;
+		c.insets = new Insets(8, 0, 0, 0);
+		c.anchor = GridBagConstraints.LINE_START;
+		add(mRectLabel, c);
 
 		setImageWithHistory(null);
 	}
@@ -136,6 +150,11 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if (e.getSource() == mImageLabel) {
+			mStartPoint.setLocation(e.getX(), e.getY());
+			mRect.setBounds(e.getX(), e.getY(), 0, 0);
+			displayRect();
+		}
 	}
 
 	@Override
@@ -152,17 +171,18 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		int x = Math.min(mStartPoint.x, e.getX());
+		int y = Math.min(mStartPoint.y, e.getY());
+		int width = Math.abs(e.getX() - mStartPoint.x);
+		int height = Math.abs(e.getY() - mStartPoint.y);
+		mRect.setBounds(x, y, width, height);
+		displayRect();
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		if (mImage != null) {
-			String red = StringUtils.rightPad(String.valueOf(mImage.getRed(e.getX(), e.getY())), 3);
-			String green = StringUtils.rightPad(String.valueOf(mImage.getGreen(e.getX(), e.getY())), 3);
-			String blue = StringUtils.rightPad(String.valueOf(mImage.getBlue(e.getX(), e.getY())), 3);
-			mPixelLabel.setText("R=" + red + " G=" + green + " B=" + blue);
-		} else {
-			mPixelLabel.setText("---");
+			displayColor(mImage.getRed(e.getX(), e.getY()), mImage.getGreen(e.getX(), e.getY()), mImage.getBlue(e.getX(), e.getY()));
 		}
 	}
 
@@ -201,6 +221,10 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	public Image getImage() {
 		return mImage;
+	}
+
+	public Rectangle getRect() {
+		return mRect;
 	}
 
 	public void setImage(Image image) {
@@ -261,5 +285,13 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 			int[] range = mImage.getRange(Image.CHANNEL_GRAY);
 			mRangeLabel.setText("[" + range[0] + ", " + range[1] + "]");
 		}
+	}
+
+	private void displayColor(int red, int green, int blue) {
+		mPixelLabel.setText("c(" + red + ", " + green + ", " + blue + ")");
+	}
+
+	private void displayRect() {
+		mRectLabel.setText("rect(" + mRect.x + ", " + mRect.y + ", " + mRect.width + ", " + mRect.height + ")");
 	}
 }
