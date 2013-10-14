@@ -86,6 +86,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mCanny;
 	private JButton mSusan;
 	private JButton mHoughLines;
+	private JButton mLevelSet;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -317,6 +318,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHoughLines.addActionListener(this);
 		menuBorders2.add(mHoughLines);
 
+		mLevelSet = new JButton("Level set");
+		mLevelSet.addActionListener(this);
+		menuBorders2.add(mLevelSet);
+
 		// test menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -547,6 +552,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.houghLines(params.getInteger("angleCount"), params.getInteger("distCount"), params.getInteger("amount"));
 			}
+		} else if (e.getSource() == mLevelSet) {
+			mController.levelSet();
 		}
 	}
 

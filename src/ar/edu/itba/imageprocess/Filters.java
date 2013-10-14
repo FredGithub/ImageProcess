@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.TreeMap;
 
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
@@ -1120,6 +1123,169 @@ public class Filters {
 		}
 
 		return new Image(bufferedImage);
+	}
+
+	public static Image levelSet(Image image, Rectangle initRect) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] phi = new int[width][height];
+		int[][] fd = new int[width][height];
+		LinkedList<Point> lin = new LinkedList<Point>();
+		LinkedList<Point> lout = new LinkedList<Point>();
+		int iterCycle1 = 100;
+		int iterCycle2 = 10;
+		Iterator<Point> it;
+		LinkedList<Point> copy;
+
+		Rectangle insideRect = new Rectangle(initRect.x + 1, initRect.y + 1, initRect.width - 2, initRect.height - 2);
+		Rectangle lOutRect = new Rectangle(initRect.x - 1, initRect.y - 1, initRect.width + 2, initRect.height + 2);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (insideRect.contains(x, y)) {
+					phi[x][y] = -3;
+				} else if (initRect.contains(x, y)) {
+					phi[x][y] = -1;
+					lin.add(new Point(x, y));
+				} else if (lOutRect.contains(x, y)) {
+					phi[x][y] = 1;
+					lout.add(new Point(x, y));
+				} else {
+					phi[x][y] = 3;
+				}
+			}
+		}
+
+		// cycle one
+		for (int i = 0; i < iterCycle1; i++) {
+			// compute the speed fd for lout and lin
+			for (Point p : lout) {
+				fd[p.x][p.y] = 1;
+			}
+			for (Point p : lin) {
+				fd[p.x][p.y] = -1;
+			}
+
+			// switch in the pixels with a positive speed
+			copy = new LinkedList<Point>(lout);
+			for (Point p : copy) {
+				if (!isBorder(p.x, p.y, width, height) && fd[p.x][p.y] > 0) {
+					levelSetSwitchIn(p, lin, lout, phi);
+				}
+			}
+
+			// remove pixels from lin that are now inside
+			it = lin.iterator();
+			while (it.hasNext()) {
+				Point p = it.next();
+				boolean toRemove = true;
+				for (int x = -1; x < 2; x++) {
+					for (int y = -1; y < 2; y++) {
+						if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] > 0) {
+							toRemove = false;
+						}
+					}
+				}
+				if (toRemove) {
+					it.remove();
+					phi[p.x][p.y] = -3;
+				}
+			}
+
+			// switch out the pixels with a negative speed
+			copy = new LinkedList<Point>(lin);
+			for (Point p : copy) {
+				if (!isBorder(p.x, p.y, width, height) && fd[p.x][p.y] < 0) {
+					levelSetSwitchOut(p, lin, lout, phi);
+				}
+			}
+
+			// remove pixels from lout that are now outside
+			it = lout.iterator();
+			while (it.hasNext()) {
+				Point p = it.next();
+				boolean toRemove = true;
+				for (int x = -1; x < 2; x++) {
+					for (int y = -1; y < 2; y++) {
+						if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] < 0) {
+							toRemove = false;
+						}
+					}
+				}
+				if (toRemove) {
+					it.remove();
+					phi[p.x][p.y] = 3;
+				}
+			}
+
+			// stopping condition
+		}
+
+		// cycle two
+		for (int i = 0; i < iterCycle2; i++) {
+
+		}
+
+		return levelSetDrawPhi(image, phi);
+	}
+
+	private static boolean isBorder(int x, int y, int width, int height) {
+		return x == 0 || x == width - 1 || y == 0 || y == height - 1;
+	}
+
+	private static boolean isOutside(int x, int y, int width, int height) {
+		return x < 0 || x >= width || y < 0 || y >= height;
+	}
+
+	private static void levelSetSwitchIn(Point p, LinkedList<Point> lin, LinkedList<Point> lout, int[][] phi) {
+		lout.remove(p);
+		lin.add(p);
+		phi[p.x][p.y] = -1;
+		for (int x = -1; x < 2; x++) {
+			for (int y = -1; y < 2; y++) {
+				if (Math.abs(x - y) == 1 && phi[p.x + x][p.y + y] == 3) {
+					lout.add(new Point(p.x + x, p.y + y));
+					phi[p.x + x][p.y + y] = 1;
+				}
+			}
+		}
+	}
+
+	private static void levelSetSwitchOut(Point p, LinkedList<Point> lin, LinkedList<Point> lout, int[][] phi) {
+		lin.remove(p);
+		lout.add(p);
+		phi[p.x][p.y] = 1;
+		for (int x = -1; x < 2; x++) {
+			for (int y = -1; y < 2; y++) {
+				if (Math.abs(x - y) == 1 && phi[p.x + x][p.y + y] == -3) {
+					lin.add(new Point(p.x + x, p.y + y));
+					phi[p.x + x][p.y + y] = -1;
+				}
+			}
+		}
+	}
+
+	private static Image levelSetDrawPhi(Image image, int[][] phi) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] redChannel = new int[width][height];
+		int[][] greenChannel = new int[width][height];
+		int[][] blueChannel = new int[width][height];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (phi[x][y] == -1) {
+					redChannel[x][y] = 255;
+				} else if (phi[x][y] == 1) {
+					blueChannel[x][y] = 255;
+				} else {
+					redChannel[x][y] = image.getRed(x, y);
+					greenChannel[x][y] = image.getGreen(x, y);
+					blueChannel[x][y] = image.getBlue(x, y);
+				}
+			}
+		}
+
+		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
 	private static int getHoughVotes(int[][] channel, double angle, double dist) {

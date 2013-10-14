@@ -444,4 +444,11 @@ public class MainController {
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
+
+	public void levelSet() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.levelSet(mImagePaneSource.getImage(), mImagePaneSource.getRect());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }

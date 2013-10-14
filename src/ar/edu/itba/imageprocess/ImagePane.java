@@ -231,12 +231,14 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		mImage = image;
 		if (mImage != null) {
 			mImageLabel.setIcon(new ImageIcon(mImage.getBufferedImage()));
+			mRect.setBounds(mImage.getWidth() / 2 - 10, mImage.getHeight() / 2 - 10, 20, 20);
 		} else {
 			mImageLabel.setIcon(null);
 		}
 		mClearBtn.setEnabled(mImage != null);
 		mController.repaintMainFrame();
 		displayRange();
+		displayRect();
 	}
 
 	public void setImageWithHistory(Image image) {
