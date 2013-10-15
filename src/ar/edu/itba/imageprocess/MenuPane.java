@@ -553,7 +553,12 @@ public class MenuPane extends JPanel implements ActionListener {
 				mController.houghLines(params.getInteger("angleCount"), params.getInteger("distCount"), params.getInteger("amount"));
 			}
 		} else if (e.getSource() == mLevelSet) {
-			mController.levelSet();
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle1", "1000"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "100"));
+			if (params.ask()) {
+				mController.levelSet(params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
+			}
 		}
 	}
 

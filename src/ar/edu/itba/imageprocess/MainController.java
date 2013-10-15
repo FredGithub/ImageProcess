@@ -445,9 +445,9 @@ public class MainController {
 		}
 	}
 
-	public void levelSet() {
+	public void levelSet(int maxIterCycle1, int maxIterCycle2) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.levelSet(mImagePaneSource.getImage(), mImagePaneSource.getRect());
+			Image image = Filters.levelSet(mImagePaneSource.getImage(), mImagePaneSource.getRect(), maxIterCycle1, maxIterCycle2);
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}

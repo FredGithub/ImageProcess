@@ -1124,20 +1124,19 @@ public class Filters {
 		return new Image(bufferedImage);
 	}
 
-	public static Image levelSet(Image image, Rectangle initRect) {
+	public static Image levelSet(Image image, Rectangle initRect, int maxIterCycle1, int maxIterCycle2) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] phi = new int[width][height];
 		double[][] fd = new double[width][height];
 		LinkedList<Point> lin = new LinkedList<Point>();
 		LinkedList<Point> lout = new LinkedList<Point>();
-		int iterCycle1 = 1000;
-		int iterCycle2 = 10;
 		LinkedList<Point> copy;
 		double[] averageIn = new double[3];
 		int numIn = 0;
 		double[] averageOut = new double[3];
 		int numOut = 0;
+		int iter;
 
 		Rectangle insideRect = new Rectangle(initRect.x + 1, initRect.y + 1, initRect.width - 2, initRect.height - 2);
 		Rectangle lOutRect = new Rectangle(initRect.x - 1, initRect.y - 1, initRect.width + 2, initRect.height + 2);
@@ -1176,7 +1175,7 @@ public class Filters {
 		//Log.d("out=" + Arrays.toString(averageOut));
 
 		// cycle one
-		for (int i = 0; i < iterCycle1; i++) {
+		for (iter = 0; iter < maxIterCycle1; iter++) {
 			boolean done = true;
 
 			// compute the speed fd for lout and lin
@@ -1213,14 +1212,35 @@ public class Filters {
 
 			// stop if we didn't find any pixel to switch
 			if (done) {
-				Log.d("stopped at iteration " + i);
 				break;
 			}
 		}
 
-		// cycle two
-		for (int i = 0; i < iterCycle2; i++) {
+		Log.d("stopped cycle one at iteration " + iter);
 
+		// cycle two
+		for (iter = 0; iter < maxIterCycle2; iter++) {
+			// apply gauss smoothing to lout
+			copy = new LinkedList<Point>(lout);
+			for (Point p : copy) {
+				if (!isBorder(p.x, p.y, width, height) && levelSetGauss(p.x, p.y, phi) < 0) {
+					levelSetSwitchIn(p, lin, lout, phi);
+				}
+			}
+
+			// remove pixels from lin that are now inside
+			levelSetCheckInside(lin, phi, width, height);
+
+			// apply gauss smoothing to lin
+			copy = new LinkedList<Point>(lin);
+			for (Point p : copy) {
+				if (!isBorder(p.x, p.y, width, height) && levelSetGauss(p.x, p.y, phi) > 0) {
+					levelSetSwitchOut(p, lin, lout, phi);
+				}
+			}
+
+			// remove pixels from lout that are now outside
+			levelSetCheckOutside(lout, phi, width, height);
 		}
 
 		return levelSetDrawPhi(image, phi);
@@ -1230,8 +1250,27 @@ public class Filters {
 		return x == 0 || x == width - 1 || y == 0 || y == height - 1;
 	}
 
-	private static boolean isOutside(int x, int y, int width, int height) {
+	private static boolean isOutOfBounds(int x, int y, int width, int height) {
 		return x < 0 || x >= width || y < 0 || y >= height;
+	}
+
+	private static double levelSetGauss(int x, int y, int[][] phi) {
+		double value = 0;
+		int maskWidth = 5;
+		int maskHeight = 5;
+		double sigma = 0.5;
+		double c = 1 / (4 * Math.PI * sigma);
+
+		for (int i = -maskWidth / 2; i <= maskWidth / 2; i++) {
+			for (int j = -maskHeight / 2; j <= maskHeight / 2; j++) {
+				double dist = i * i + j * j;
+				double exp = Math.exp((-1 * dist) / 4 * sigma);
+				double val = c * exp;
+				value += getValueInBounds(phi, x + i, y + j) * val;
+			}
+		}
+
+		return value;
 	}
 
 	private static double levelSetCalcSpeed(Image image, int x, int y, double[] averageIn, double[] averageOut) {
@@ -1282,7 +1321,7 @@ public class Filters {
 			boolean toRemove = true;
 			for (int x = -1; x < 2; x++) {
 				for (int y = -1; y < 2; y++) {
-					if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] > 0) {
+					if (Math.abs(x - y) == 1 && !isOutOfBounds(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] > 0) {
 						toRemove = false;
 					}
 				}
@@ -1301,7 +1340,7 @@ public class Filters {
 			boolean toRemove = true;
 			for (int x = -1; x < 2; x++) {
 				for (int y = -1; y < 2; y++) {
-					if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] < 0) {
+					if (Math.abs(x - y) == 1 && !isOutOfBounds(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] < 0) {
 						toRemove = false;
 					}
 				}
