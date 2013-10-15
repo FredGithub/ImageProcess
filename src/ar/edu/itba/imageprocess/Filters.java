@@ -157,7 +157,6 @@ public class Filters {
 		int[] range = image.getRange(Image.CHANNEL_GRAY);
 		double factor = (double) 255 / (range[1] - range[0]);
 		double b = -factor * range[0];
-		Log.d("factor=" + factor + " b=" + b);
 
 		// apply the filter to all pixels
 		for (int x = 0; x < width; x++) {
@@ -1129,13 +1128,16 @@ public class Filters {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] phi = new int[width][height];
-		int[][] fd = new int[width][height];
+		double[][] fd = new double[width][height];
 		LinkedList<Point> lin = new LinkedList<Point>();
 		LinkedList<Point> lout = new LinkedList<Point>();
-		int iterCycle1 = 100;
+		int iterCycle1 = 1000;
 		int iterCycle2 = 10;
-		Iterator<Point> it;
 		LinkedList<Point> copy;
+		double[] averageIn = new double[3];
+		int numIn = 0;
+		double[] averageOut = new double[3];
+		int numOut = 0;
 
 		Rectangle insideRect = new Rectangle(initRect.x + 1, initRect.y + 1, initRect.width - 2, initRect.height - 2);
 		Rectangle lOutRect = new Rectangle(initRect.x - 1, initRect.y - 1, initRect.width + 2, initRect.height + 2);
@@ -1143,6 +1145,10 @@ public class Filters {
 			for (int y = 0; y < height; y++) {
 				if (insideRect.contains(x, y)) {
 					phi[x][y] = -3;
+					averageIn[0] += image.getRed(x, y);
+					averageIn[1] += image.getGreen(x, y);
+					averageIn[2] += image.getBlue(x, y);
+					numIn++;
 				} else if (initRect.contains(x, y)) {
 					phi[x][y] = -1;
 					lin.add(new Point(x, y));
@@ -1151,73 +1157,65 @@ public class Filters {
 					lout.add(new Point(x, y));
 				} else {
 					phi[x][y] = 3;
+					averageOut[0] += image.getRed(x, y);
+					averageOut[1] += image.getGreen(x, y);
+					averageOut[2] += image.getBlue(x, y);
+					numOut++;
 				}
 			}
 		}
 
+		// calculate the average colors
+		averageIn[0] = averageIn[0] / numIn;
+		averageIn[1] = averageIn[1] / numIn;
+		averageIn[2] = averageIn[2] / numIn;
+		averageOut[0] = averageOut[0] / numOut;
+		averageOut[1] = averageOut[1] / numOut;
+		averageOut[2] = averageOut[2] / numOut;
+		//Log.d("in=" + Arrays.toString(averageIn));
+		//Log.d("out=" + Arrays.toString(averageOut));
+
 		// cycle one
 		for (int i = 0; i < iterCycle1; i++) {
+			boolean done = true;
+
 			// compute the speed fd for lout and lin
 			for (Point p : lout) {
-				fd[p.x][p.y] = 1;
+				fd[p.x][p.y] = levelSetCalcSpeed(image, p.x, p.y, averageIn, averageOut);
 			}
 			for (Point p : lin) {
-				fd[p.x][p.y] = -1;
+				fd[p.x][p.y] = levelSetCalcSpeed(image, p.x, p.y, averageIn, averageOut);
 			}
 
 			// switch in the pixels with a positive speed
 			copy = new LinkedList<Point>(lout);
 			for (Point p : copy) {
 				if (!isBorder(p.x, p.y, width, height) && fd[p.x][p.y] > 0) {
+					done = false;
 					levelSetSwitchIn(p, lin, lout, phi);
 				}
 			}
 
 			// remove pixels from lin that are now inside
-			it = lin.iterator();
-			while (it.hasNext()) {
-				Point p = it.next();
-				boolean toRemove = true;
-				for (int x = -1; x < 2; x++) {
-					for (int y = -1; y < 2; y++) {
-						if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] > 0) {
-							toRemove = false;
-						}
-					}
-				}
-				if (toRemove) {
-					it.remove();
-					phi[p.x][p.y] = -3;
-				}
-			}
+			levelSetCheckInside(lin, phi, width, height);
 
 			// switch out the pixels with a negative speed
 			copy = new LinkedList<Point>(lin);
 			for (Point p : copy) {
 				if (!isBorder(p.x, p.y, width, height) && fd[p.x][p.y] < 0) {
+					done = false;
 					levelSetSwitchOut(p, lin, lout, phi);
 				}
 			}
 
 			// remove pixels from lout that are now outside
-			it = lout.iterator();
-			while (it.hasNext()) {
-				Point p = it.next();
-				boolean toRemove = true;
-				for (int x = -1; x < 2; x++) {
-					for (int y = -1; y < 2; y++) {
-						if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] < 0) {
-							toRemove = false;
-						}
-					}
-				}
-				if (toRemove) {
-					it.remove();
-					phi[p.x][p.y] = 3;
-				}
-			}
+			levelSetCheckOutside(lout, phi, width, height);
 
-			// stopping condition
+			// stop if we didn't find any pixel to switch
+			if (done) {
+				Log.d("stopped at iteration " + i);
+				break;
+			}
 		}
 
 		// cycle two
@@ -1234,6 +1232,19 @@ public class Filters {
 
 	private static boolean isOutside(int x, int y, int width, int height) {
 		return x < 0 || x >= width || y < 0 || y >= height;
+	}
+
+	private static double levelSetCalcSpeed(Image image, int x, int y, double[] averageIn, double[] averageOut) {
+		int red = image.getRed(x, y);
+		int green = image.getGreen(x, y);
+		int blue = image.getBlue(x, y);
+
+		double p1 = Math.sqrt(Math.pow((averageIn[0] - red), 2) + Math.pow((averageIn[1] - green), 2) + Math.pow((averageIn[2] - blue), 2));
+		double p2 = Math.sqrt(Math.pow((averageOut[0] - red), 2) + Math.pow((averageOut[1] - green), 2) + Math.pow((averageOut[2] - blue), 2));
+		double psigma1 = 1 - p1 / (Math.sqrt(3) * 255);
+		double psigma2 = 1 - p2 / (3 * 255);
+
+		return Math.log(psigma1 / psigma2);
 	}
 
 	private static void levelSetSwitchIn(Point p, LinkedList<Point> lin, LinkedList<Point> lout, int[][] phi) {
@@ -1260,6 +1271,44 @@ public class Filters {
 					lin.add(new Point(p.x + x, p.y + y));
 					phi[p.x + x][p.y + y] = -1;
 				}
+			}
+		}
+	}
+
+	private static void levelSetCheckInside(LinkedList<Point> lin, int[][] phi, int width, int height) {
+		Iterator<Point> it = lin.iterator();
+		while (it.hasNext()) {
+			Point p = it.next();
+			boolean toRemove = true;
+			for (int x = -1; x < 2; x++) {
+				for (int y = -1; y < 2; y++) {
+					if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] > 0) {
+						toRemove = false;
+					}
+				}
+			}
+			if (toRemove) {
+				it.remove();
+				phi[p.x][p.y] = -3;
+			}
+		}
+	}
+
+	private static void levelSetCheckOutside(LinkedList<Point> lout, int[][] phi, int width, int height) {
+		Iterator<Point> it = lout.iterator();
+		while (it.hasNext()) {
+			Point p = it.next();
+			boolean toRemove = true;
+			for (int x = -1; x < 2; x++) {
+				for (int y = -1; y < 2; y++) {
+					if (Math.abs(x - y) == 1 && !isOutside(p.x + x, p.y + y, width, height) && phi[p.x + x][p.y + y] < 0) {
+						toRemove = false;
+					}
+				}
+			}
+			if (toRemove) {
+				it.remove();
+				phi[p.x][p.y] = 3;
 			}
 		}
 	}
