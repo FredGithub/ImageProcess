@@ -1066,26 +1066,29 @@ public class Filters {
 		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
 			double angle = angleIter * angleStep;
 			Log.d("progress " + (100.0 * (angleIter + 1) / angleCount) + "%");
-			if (angle == Math.PI || angle == 0)
-				Log.d("hor");
-			if (angle == Math.PI / 2)
-				Log.d("ver");
 
 			for (int distIter = 0; distIter < distCount; distIter++) {
 				double dist = distIter * distStep;
 				double val = getHoughVotes(grayChannel, angle, dist);
 				votes[angleIter][distIter] = val;
-				lines.add(new double[] { angle, dist, val });
+				lines.add(new double[] { val, angle, dist });
 			}
 		}
 
+		ArrayList<double[]> limitedLines = filterMostVoted(lines, amount);
+		Log.d("number of lines kept: " + limitedLines.size());
+
+		return limitedLines;
+	}
+
+	private static ArrayList<double[]> filterMostVoted(ArrayList<double[]> lines, int amount) {
 		// sort the lines
 		Collections.sort(lines, new Comparator<double[]>() {
 			@Override
 			public int compare(double[] o1, double[] o2) {
-				if (o1[2] > o2[2]) {
+				if (o1[0] > o2[0]) {
 					return -1;
-				} else if (o1[2] < o2[2]) {
+				} else if (o1[0] < o2[0]) {
 					return 1;
 				} else {
 					return 0;
@@ -1101,7 +1104,6 @@ public class Filters {
 			}
 			limitedLines.add(obj);
 		}
-		Log.d("number of lines kept: " + limitedLines.size());
 
 		return limitedLines;
 	}
@@ -1130,7 +1132,7 @@ public class Filters {
 		// get the hough lines and draw them
 		ArrayList<double[]> lines = getHoughLines(image, angleCount, distCount, amount);
 		for (double[] line : lines) {
-			drawLineNormal(g, line[0], line[1]);
+			drawLineNormal(g, line[1], line[2]);
 		}
 
 		return new Image(bufferedImage);
