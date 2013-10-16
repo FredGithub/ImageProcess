@@ -554,10 +554,11 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mLevelSet) {
 			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "mode", 0, 1, "0"));
 			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle1", "1000"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "100"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "4"));
 			if (params.ask()) {
-				mController.levelSet(params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
+				mController.levelSet(params.getInteger("mode"), params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
 			}
 		}
 	}

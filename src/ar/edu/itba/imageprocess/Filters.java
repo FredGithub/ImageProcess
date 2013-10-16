@@ -1124,7 +1124,7 @@ public class Filters {
 		return new Image(bufferedImage);
 	}
 
-	public static Image levelSet(Image image, Rectangle initRect, int maxIterCycle1, int maxIterCycle2) {
+	public static Image levelSet(Image image, Rectangle initRect, int mode, int maxIterCycle1, int maxIterCycle2) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] phi = new int[width][height];
@@ -1243,7 +1243,7 @@ public class Filters {
 			levelSetCheckOutside(lout, phi, width, height);
 		}
 
-		return levelSetDrawPhi(image, phi);
+		return levelSetDrawPhi(image, phi, mode);
 	}
 
 	private static boolean isBorder(int x, int y, int width, int height) {
@@ -1352,7 +1352,7 @@ public class Filters {
 		}
 	}
 
-	private static Image levelSetDrawPhi(Image image, int[][] phi) {
+	private static Image levelSetDrawPhi(Image image, int[][] phi, int mode) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] redChannel = new int[width][height];
@@ -1365,7 +1365,7 @@ public class Filters {
 					redChannel[x][y] = 255;
 				} else if (phi[x][y] == 1) {
 					blueChannel[x][y] = 255;
-				} else {
+				} else if (mode == 0) {
 					redChannel[x][y] = image.getRed(x, y);
 					greenChannel[x][y] = image.getGreen(x, y);
 					blueChannel[x][y] = image.getBlue(x, y);
