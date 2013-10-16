@@ -10,9 +10,10 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.TreeMap;
 
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ChartUtils;
@@ -1056,16 +1057,14 @@ public class Filters {
 		int height = image.getHeight();
 		int[][] grayChannel = image.getGrayChannel();
 
-		double angleRange = Math.PI / 2;
-		double angleStep = (angleRange * 2) / (angleCount - 1);
-		double distRange = Math.sqrt(2) * Math.max(width, height);
-		double distStep = (distRange * 2) / (distCount - 1);
-		int[][] votes = new int[angleCount][distCount];
-		TreeMap<Integer, double[]> orderedLines = new TreeMap<Integer, double[]>();
+		double angleStep = Math.PI / angleCount;
+		double distStep = Math.max(width, height) / distCount;
+		double[][] votes = new double[angleCount][distCount];
+		ArrayList<double[]> lines = new ArrayList<double[]>();
 
 		// get the votes for each line
 		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
-			double angle = -angleRange + angleIter * angleStep;
+			double angle = angleIter * angleStep;
 			Log.d("progress " + (100.0 * (angleIter + 1) / angleCount) + "%");
 			if (angle == Math.PI || angle == 0)
 				Log.d("hor");
@@ -1073,36 +1072,49 @@ public class Filters {
 				Log.d("ver");
 
 			for (int distIter = 0; distIter < distCount; distIter++) {
-				double dist = -distRange + distIter * distStep;
-				int val = getHoughVotes(grayChannel, angle, dist);
+				double dist = distIter * distStep;
+				double val = getHoughVotes(grayChannel, angle, dist);
 				votes[angleIter][distIter] = val;
-				orderedLines.put(val, new double[] { angle, dist });
+				lines.add(new double[] { angle, dist, val });
 			}
 		}
 
-		// get the first lines
-		ArrayList<double[]> lines = new ArrayList<double[]>();
-		Iterator<Integer> it = orderedLines.descendingKeySet().iterator();
-		while (it.hasNext() && lines.size() < amount) {
-			Integer key = it.next();
-			lines.add(orderedLines.get(key));
-		}
+		// sort the lines
+		Collections.sort(lines, new Comparator<double[]>() {
+			@Override
+			public int compare(double[] o1, double[] o2) {
+				if (o1[2] > o2[2]) {
+					return -1;
+				} else if (o1[2] < o2[2]) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		});
 
-		return lines;
+		// get the amount first lines
+		ArrayList<double[]> limitedLines = new ArrayList<double[]>();
+		for (double[] obj : lines) {
+			if (amount > 0 && limitedLines.size() >= amount) {
+				break;
+			}
+			limitedLines.add(obj);
+		}
+		Log.d("number of lines kept: " + limitedLines.size());
+
+		return limitedLines;
 	}
 
 	public static void drawLineNormal(Graphics g, double angle, double dist) {
-		double x = Math.cos(angle) * dist;
-		double y = Math.sin(angle) * dist;
-		double len = Math.sqrt(x * x + y * y);
-		double dirX = x / len;
-		double dirY = y / len;
+		double dirX = Math.cos(angle);
+		double dirY = Math.sin(angle);
 		double norX = dirY;
 		double norY = -dirX;
-		double x1 = x - norX * 10000;
-		double y1 = y - norY * 10000;
-		double x2 = x + norX * 10000;
-		double y2 = y + norY * 10000;
+		double x1 = dirX * dist - norX * 10000;
+		double y1 = dirY * dist - norY * 10000;
+		double x2 = dirX * dist + norX * 10000;
+		double y2 = dirY * dist + norY * 10000;
 		g.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
 	}
 
@@ -1122,6 +1134,30 @@ public class Filters {
 		}
 
 		return new Image(bufferedImage);
+	}
+
+	private static double getHoughVotes(int[][] channel, double angle, double dist) {
+		int width = channel.length;
+		int height = channel[0].length;
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
+		double epsilon = 1;
+		double votes = 0;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (channel[x][y] >= 128) {
+					double space = Math.abs(dist - x * cos - y * sin);
+					if (space == 0) {
+						votes += 1;
+					} else if (space <= epsilon) {
+						votes += 1 / (1 + space);
+					}
+				}
+			}
+		}
+
+		return votes;
 	}
 
 	public static Image levelSet(Image image, Rectangle initRect, int mode, int maxIterCycle1, int maxIterCycle2) {
@@ -1374,27 +1410,6 @@ public class Filters {
 		}
 
 		return new Image(redChannel, greenChannel, blueChannel);
-	}
-
-	private static int getHoughVotes(int[][] channel, double angle, double dist) {
-		int width = channel.length;
-		int height = channel[0].length;
-		double cos = Math.cos(angle);
-		double sin = Math.sin(angle);
-		double epsilon = 1;
-		int votes = 0;
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (channel[x][y] >= 128) {
-					if (Math.abs(dist - x * cos - y * sin) < epsilon) {
-						votes++;
-					}
-				}
-			}
-		}
-
-		return votes;
 	}
 
 	private static int toDiscreteAngle(double angle) {
