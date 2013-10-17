@@ -3,6 +3,7 @@ package ar.edu.itba.imageprocess;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -458,8 +459,26 @@ public class MainController {
 
 	public void levelSet(int mode, int maxIterCycle1, int maxIterCycle2) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.levelSet(mImagePaneSource.getImage(), mImagePaneSource.getRect(), mode, maxIterCycle1, maxIterCycle2);
+			LevelSetState state = Filters.levelSetStateFromRect(mImagePaneSource.getImage(), mImagePaneSource.getRect());
+			Image image = Filters.levelSet(mImagePaneSource.getImage(), state, mode, maxIterCycle1, maxIterCycle2);
 			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void levelSetSequence(final int mode, final int maxIterCycle1, final int maxIterCycle2) {
+		if (mImagePaneDest != null && mImagePaneSource != null) {
+			ArrayList<Image> imageList = new ArrayList<Image>(mImagePaneSource.getHistory());
+			LevelSetState state = null;
+			for (Image image : imageList) {
+				if (image != null) {
+					if (state == null) {
+						state = Filters.levelSetStateFromRect(image, mImagePaneSource.getRect());
+					}
+					Image newImage = Filters.levelSet(image, state, mode, maxIterCycle1, maxIterCycle2);
+					mImagePaneDest.setImageWithHistory(newImage);
+					mImagePaneDest.paintImmediately(mImagePaneDest.getBounds());
+				}
+			}
 		}
 	}
 }

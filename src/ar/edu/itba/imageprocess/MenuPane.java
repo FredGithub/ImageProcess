@@ -90,6 +90,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mHoughLines;
 	private JButton mHoughCircles;
 	private JButton mLevelSet;
+	private JButton mLevelSetSequence;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -335,6 +336,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mLevelSet = new JButton("Level set");
 		mLevelSet.addActionListener(this);
 		menuBorders2.add(mLevelSet);
+
+		mLevelSetSequence = new JButton("Level set seq");
+		mLevelSetSequence.addActionListener(this);
+		menuBorders2.add(mLevelSetSequence);
 
 		// test menu
 
@@ -583,6 +588,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "4"));
 			if (params.ask()) {
 				mController.levelSet(params.getInteger("mode"), params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
+			}
+		} else if (e.getSource() == mLevelSetSequence) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "mode", 0, 1, "0"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle1", "1000"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "4"));
+			if (params.ask()) {
+				mController.levelSetSequence(params.getInteger("mode"), params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
 			}
 		}
 	}

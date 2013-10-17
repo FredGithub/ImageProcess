@@ -1243,20 +1243,18 @@ public class Filters {
 		return limitedLines;
 	}
 
-	public static Image levelSet(Image image, Rectangle initRect, int mode, int maxIterCycle1, int maxIterCycle2) {
+	public static LevelSetState levelSetStateFromRect(Image image, Rectangle initRect) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] phi = new int[width][height];
-		double[][] fd = new double[width][height];
 		LinkedList<Point> lin = new LinkedList<Point>();
 		LinkedList<Point> lout = new LinkedList<Point>();
-		LinkedList<Point> copy;
 		double[] averageIn = new double[3];
 		int numIn = 0;
 		double[] averageOut = new double[3];
 		int numOut = 0;
-		int iter;
 
+		// transform the rectangle into phi, lin and lout
 		Rectangle insideRect = new Rectangle(initRect.x + 1, initRect.y + 1, initRect.width - 2, initRect.height - 2);
 		Rectangle lOutRect = new Rectangle(initRect.x - 1, initRect.y - 1, initRect.width + 2, initRect.height + 2);
 		for (int x = 0; x < width; x++) {
@@ -1292,6 +1290,21 @@ public class Filters {
 		averageOut[2] = averageOut[2] / numOut;
 		//Log.d("in=" + Arrays.toString(averageIn));
 		//Log.d("out=" + Arrays.toString(averageOut));
+
+		return new LevelSetState(phi, lin, lout, averageIn, averageOut);
+	}
+
+	public static Image levelSet(Image image, LevelSetState state, int mode, int maxIterCycle1, int maxIterCycle2) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] phi = state.phi;
+		double[][] fd = new double[width][height];
+		LinkedList<Point> lin = state.lin;
+		LinkedList<Point> lout = state.lout;
+		LinkedList<Point> copy;
+		double[] averageIn = state.averageIn;
+		double[] averageOut = state.averageOut;
+		int iter;
 
 		// cycle one
 		for (iter = 0; iter < maxIterCycle1; iter++) {

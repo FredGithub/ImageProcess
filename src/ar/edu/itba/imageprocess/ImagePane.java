@@ -104,7 +104,7 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 		c.gridy = 1;
 		c.insets = new Insets(8, 0, 0, 8);
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
-		//add(mClearBtn, c);
+		add(mClearBtn, c);
 
 		mRangeLabel = new JLabel();
 		mRangeLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -226,6 +226,10 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	public Rectangle getRect() {
 		return mRect;
+	}
+
+	public ArrayList<Image> getHistory() {
+		return mHistory;
 	}
 
 	public void setImage(Image image) {
