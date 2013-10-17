@@ -307,6 +307,18 @@ public class Filters {
 		return new Image(grayChannel);
 	}
 
+	private static int equalize(int n, int[] cuFeq) {
+		int min = Math.abs(n - cuFeq[0]);
+		int minindex = 0;
+		for (int i = 1; i < cuFeq.length; i++) {
+			if (Math.abs(n - cuFeq[i]) < min) {
+				min = Math.abs(n - cuFeq[i]);
+				minindex = i;
+			}
+		}
+		return minindex;
+	}
+
 	public static Image applyAddGaussianNoise(Image image, double sigma, double average, double percentage) {
 		// prepare the new image gray channel
 		int width = image.getWidth();
@@ -1517,23 +1529,6 @@ public class Filters {
 			size++;
 		}
 		return size;
-	}
-
-	/**
-	 * Used to find the correct output value for the equalization
-	 * 
-	 * @return
-	 */
-	private static int equalize(int n, int[] cuFeq) {
-		int min = Math.abs(n - cuFeq[0]);
-		int minindex = 0;
-		for (int i = 1; i < cuFeq.length; i++) {
-			if (Math.abs(n - cuFeq[i]) < min) {
-				min = Math.abs(n - cuFeq[i]);
-				minindex = i;
-			}
-		}
-		return minindex;
 	}
 
 	private static void applyFactorMask(Image image, double[][] mask, double factor, int[][] redChannel, int[][] greenChannel, int[][] blueChannel) {

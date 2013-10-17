@@ -227,9 +227,6 @@ public class MainController {
 		}
 	}
 
-	/**
-	 * TP1-2 Creates a negative of the image.
-	 */
 	public void filterNegative() {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.filterNegative(mImagePaneSource.getImage());
@@ -237,9 +234,6 @@ public class MainController {
 		}
 	}
 
-	/**
-	 * TP1-5 Creates a threshold version of the image.
-	 */
 	public void filterThreshold(int threshold) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.filterThreshold(mImagePaneSource.getImage(), threshold);
@@ -254,21 +248,12 @@ public class MainController {
 		}
 	}
 
-	/**
-	 * TP1-6 histogram equalization
-	 * 
-	 * http://www.mee.tcd.ie/~ack/teaching/1e8/histogram_equalisation_slides.pdf
-	 */
 	public void filterEqualize() {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.filterEqualize(mImagePaneSource.getImage());
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
-
-	/**
-	 * Adds gaussian noise to an image
-	 */
 
 	public void applyAddGaussianNoise(double spread, double average, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
@@ -277,10 +262,6 @@ public class MainController {
 		}
 	}
 
-	/**
-	 * Adds rayleigh noise to an image
-	 */
-
 	public void applyMulRayleighNoise(double p, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.applyMulRayleighNoise(mImagePaneSource.getImage(), p, percentage);
@@ -288,9 +269,6 @@ public class MainController {
 		}
 	}
 
-	/**
-	 * Adds exponential noise to an image
-	 */
 	public void applyMulExponentialNoise(double p, double percentage) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.applyMulExponentialNoise(mImagePaneSource.getImage(), p, percentage);
