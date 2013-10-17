@@ -188,10 +188,11 @@ public class ImagePane extends JPanel implements MouseListener, MouseMotionListe
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		boolean ctrl = (e.getModifiers() & ActionEvent.CTRL_MASK) != 0;
 		if (e.getSource() == mPrevBtn) {
-			historyMove(-1);
+			historyMove(ctrl ? -mHistory.size() : -1);
 		} else if (e.getSource() == mNextBtn) {
-			historyMove(+1);
+			historyMove(ctrl ? mHistory.size() : 1);
 		} else if (e.getSource() == mClearBtn) {
 			setImageWithHistory(null);
 		}

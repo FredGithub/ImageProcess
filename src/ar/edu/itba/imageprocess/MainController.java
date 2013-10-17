@@ -110,10 +110,29 @@ public class MainController {
 		}
 	}
 
-	public void loadSequence(File file) {
+	public void loadSequence(File[] files) {
 		if (mImagePaneDest != null) {
-			Log.d("opening " + file.getName());
-
+			for (int i = 0; i < files.length; i++) {
+				File file = files[i];
+				Log.d("opening " + file.getName());
+				try {
+					Image image = null;
+					BufferedImage bufferedImage = ImageIO.read(file);
+					if (bufferedImage != null) {
+						image = new Image(bufferedImage);
+					}
+					if (image != null) {
+						mImagePaneDest.setImageWithHistory(image);
+					} else {
+						Log.d("couldn't load image " + file.getName());
+					}
+				} catch (IOException e) {
+					Log.d("couldn't open file! " + e);
+				} catch (Exception e) {
+					Log.d("unknown error! " + e);
+				}
+			}
+			repaintMainFrame();
 		}
 	}
 

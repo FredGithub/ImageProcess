@@ -632,8 +632,8 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		// if the user selected a file
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File file = mSequenceChooser.getSelectedFile();
-			mController.loadSequence(file);
+			File[] files = mSequenceChooser.getSelectedFiles();
+			mController.loadSequence(files);
 		}
 	}
 }
