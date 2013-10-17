@@ -110,6 +110,13 @@ public class MainController {
 		}
 	}
 
+	public void loadSequence(File file) {
+		if (mImagePaneDest != null) {
+			Log.d("opening " + file.getName());
+
+		}
+	}
+
 	public void generateWhiteImage() {
 		if (mImagePaneDest != null) {
 			Image image = Filters.generateWhiteImage(256, 256);

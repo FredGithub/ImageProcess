@@ -30,11 +30,13 @@ public class MenuPane extends JPanel implements ActionListener {
 
 	private MainController mController;
 	private JFileChooser mFileChooser;
+	private JFileChooser mSequenceChooser;
 	private HashMap<String, int[]> mDefaultDimensions;
 
 	// file menu
 	private JButton mLoadBtn;
 	private JButton mSaveBtn;
+	private JButton mLoadSequence;
 
 	// simple process menu
 	private JButton mGenerateWhite;
@@ -102,6 +104,9 @@ public class MenuPane extends JPanel implements ActionListener {
 
 		mFileChooser = new JFileChooser(ImageProcess.IMG_PATH);
 		mFileChooser.setFileFilter(new ImageFilter());
+		mSequenceChooser = new JFileChooser(ImageProcess.VIDEOS_PATH);
+		mSequenceChooser.setFileFilter(new ImageFilter());
+		mSequenceChooser.setMultiSelectionEnabled(true);
 
 		mDefaultDimensions = new HashMap<String, int[]>();
 		mDefaultDimensions.put("girl.raw", DEFAULT_GIRL);
@@ -129,6 +134,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mSaveBtn = new JButton("Save");
 		mSaveBtn.addActionListener(this);
 		menuFile.add(mSaveBtn);
+
+		mLoadSequence = new JButton("Load sequence");
+		mLoadSequence.addActionListener(this);
+		menuFile.add(mLoadSequence);
 
 		// simple process menu
 
@@ -351,6 +360,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			loadImage();
 		} else if (e.getSource() == mSaveBtn) {
 			saveImage();
+		} else if (e.getSource() == mLoadSequence) {
+			loadSequence();
 		} else if (e.getSource() == mGenerateWhite) {
 			mController.generateWhiteImage();
 		} else if (e.getSource() == mGenerateCircleBtn) {
@@ -613,6 +624,16 @@ public class MenuPane extends JPanel implements ActionListener {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = mFileChooser.getSelectedFile();
 			mController.saveImage(file);
+		}
+	}
+
+	private void loadSequence() {
+		int returnVal = mSequenceChooser.showOpenDialog(this);
+
+		// if the user selected a file
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = mSequenceChooser.getSelectedFile();
+			mController.loadSequence(file);
 		}
 	}
 }
