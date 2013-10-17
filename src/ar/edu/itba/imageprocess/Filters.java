@@ -1052,62 +1052,6 @@ public class Filters {
 		return new Image(redChannel, greenChannel, blueChannel);
 	}
 
-	public static ArrayList<double[]> getHoughLines(Image image, int angleCount, int distCount, int amount) {
-		int width = image.getWidth();
-		int height = image.getHeight();
-		int[][] grayChannel = image.getGrayChannel();
-
-		double angleStep = Math.PI / angleCount;
-		double distStep = Math.max(width, height) / distCount;
-		double[][] votes = new double[angleCount][distCount];
-		ArrayList<double[]> lines = new ArrayList<double[]>();
-
-		// get the votes for each line
-		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
-			double angle = angleIter * angleStep;
-			Log.d("progress " + (100.0 * (angleIter + 1) / angleCount) + "%");
-
-			for (int distIter = 0; distIter < distCount; distIter++) {
-				double dist = distIter * distStep;
-				double val = getHoughVotes(grayChannel, angle, dist);
-				votes[angleIter][distIter] = val;
-				lines.add(new double[] { val, angle, dist });
-			}
-		}
-
-		ArrayList<double[]> limitedLines = filterMostVoted(lines, amount);
-		Log.d("number of lines kept: " + limitedLines.size());
-
-		return limitedLines;
-	}
-
-	private static ArrayList<double[]> filterMostVoted(ArrayList<double[]> lines, int amount) {
-		// sort the lines
-		Collections.sort(lines, new Comparator<double[]>() {
-			@Override
-			public int compare(double[] o1, double[] o2) {
-				if (o1[0] > o2[0]) {
-					return -1;
-				} else if (o1[0] < o2[0]) {
-					return 1;
-				} else {
-					return 0;
-				}
-			}
-		});
-
-		// get the amount first lines
-		ArrayList<double[]> limitedLines = new ArrayList<double[]>();
-		for (double[] obj : lines) {
-			if (amount > 0 && limitedLines.size() >= amount) {
-				break;
-			}
-			limitedLines.add(obj);
-		}
-
-		return limitedLines;
-	}
-
 	public static void drawLineNormal(Graphics g, double angle, double dist) {
 		double dirX = Math.cos(angle);
 		double dirY = Math.sin(angle);
@@ -1138,6 +1082,35 @@ public class Filters {
 		return new Image(bufferedImage);
 	}
 
+	private static ArrayList<double[]> getHoughLines(Image image, int angleCount, int distCount, int amount) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
+
+		double angleStep = Math.PI / angleCount;
+		double distStep = Math.max(width, height) / distCount;
+		double[][] votes = new double[angleCount][distCount];
+		ArrayList<double[]> lines = new ArrayList<double[]>();
+
+		// get the votes for each line
+		for (int angleIter = 0; angleIter < angleCount; angleIter++) {
+			double angle = angleIter * angleStep;
+			Log.d("progress " + (100.0 * (angleIter + 1) / angleCount) + "%");
+
+			for (int distIter = 0; distIter < distCount; distIter++) {
+				double dist = distIter * distStep;
+				double val = getHoughVotes(grayChannel, angle, dist);
+				votes[angleIter][distIter] = val;
+				lines.add(new double[] { val, angle, dist });
+			}
+		}
+
+		ArrayList<double[]> limitedLines = filterMostVoted(lines, amount);
+		Log.d("number of lines kept: " + limitedLines.size());
+
+		return limitedLines;
+	}
+
 	private static double getHoughVotes(int[][] channel, double angle, double dist) {
 		int width = channel.length;
 		int height = channel[0].length;
@@ -1160,6 +1133,102 @@ public class Filters {
 		}
 
 		return votes;
+	}
+
+	public static Image houghCircles(Image image, int radius1, int radius2, int amount) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		// create the buffered image
+		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics g = bufferedImage.getGraphics();
+		g.setColor(Color.GREEN);
+
+		// get the hough circles and draw them
+		ArrayList<double[]> circles = new ArrayList<double[]>();
+		circles.add(new double[] { 0, 54, 70, 32 });
+		circles = getHoughCircles(image, radius1, radius2, amount);
+		for (double[] circle : circles) {
+			int x = (int) (circle[1] - circle[3]);
+			int y = (int) (circle[2] - circle[3]);
+			int size = (int) (circle[3] * 2);
+			g.drawOval(x, y, size, size);
+			Log.d("circle (" + circle[1] + ", " + circle[2] + ", " + circle[3] + ")");
+		}
+
+		return new Image(bufferedImage);
+	}
+
+	private static ArrayList<double[]> getHoughCircles(Image image, int radius1, int radius2, int amount) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
+		ArrayList<double[]> circles = new ArrayList<double[]>();
+
+		// get the votes for each circle
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				Log.d("progress " + (100.0 * (x * width + y) / (width * height + 1)) + "%");
+				for (int radius = radius1; radius <= radius2; radius++) {
+					double val = getHoughVotesCircle(grayChannel, x, y, radius);
+					circles.add(new double[] { val, x, y, radius });
+				}
+			}
+		}
+
+		ArrayList<double[]> limitedCircles = filterMostVoted(circles, amount);
+		Log.d("number of circles kept: " + limitedCircles.size());
+
+		return limitedCircles;
+	}
+
+	private static double getHoughVotesCircle(int[][] channel, int centerX, int centerY, double radius) {
+		int width = channel.length;
+		int height = channel[0].length;
+		double epsilon = 10;
+		double votes = 0;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (channel[x][y] >= 128) {
+					double space = Math.abs(radius * radius - (x - centerX) * (x - centerX) - (y - centerY) * (y - centerY));
+					if (space == 0) {
+						votes += 1;
+					} else if (space <= epsilon) {
+						votes += 1 / (1 + space);
+					}
+				}
+			}
+		}
+
+		return votes;
+	}
+
+	private static ArrayList<double[]> filterMostVoted(ArrayList<double[]> lines, int amount) {
+		// sort the lines
+		Collections.sort(lines, new Comparator<double[]>() {
+			@Override
+			public int compare(double[] o1, double[] o2) {
+				if (o1[0] > o2[0]) {
+					return -1;
+				} else if (o1[0] < o2[0]) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		});
+
+		// get the amount first lines
+		ArrayList<double[]> limitedLines = new ArrayList<double[]>();
+		for (double[] obj : lines) {
+			if (amount > 0 && limitedLines.size() >= amount) {
+				break;
+			}
+			limitedLines.add(obj);
+		}
+
+		return limitedLines;
 	}
 
 	public static Image levelSet(Image image, Rectangle initRect, int mode, int maxIterCycle1, int maxIterCycle2) {

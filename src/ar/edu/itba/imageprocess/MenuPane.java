@@ -86,6 +86,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mCanny;
 	private JButton mSusan;
 	private JButton mHoughLines;
+	private JButton mHoughCircles;
 	private JButton mLevelSet;
 
 	// test menu
@@ -317,6 +318,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHoughLines = new JButton("Hough lines");
 		mHoughLines.addActionListener(this);
 		menuBorders2.add(mHoughLines);
+
+		mHoughCircles = new JButton("Hough circles");
+		mHoughCircles.addActionListener(this);
+		menuBorders2.add(mHoughCircles);
 
 		mLevelSet = new JButton("Level set");
 		mLevelSet.addActionListener(this);
@@ -551,6 +556,14 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "amount", "4"));
 			if (params.ask()) {
 				mController.houghLines(params.getInteger("angleCount"), params.getInteger("distCount"), params.getInteger("amount"));
+			}
+		} else if (e.getSource() == mHoughCircles) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_INTEGER, "radius1", "2"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "radius2", "12"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "amount", "4"));
+			if (params.ask()) {
+				mController.houghCircles(params.getInteger("radius1"), params.getInteger("radius2"), params.getInteger("amount"));
 			}
 		} else if (e.getSource() == mLevelSet) {
 			ParamAsker params = new ParamAsker();

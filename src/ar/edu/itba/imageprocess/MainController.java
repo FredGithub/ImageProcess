@@ -445,6 +445,13 @@ public class MainController {
 		}
 	}
 
+	public void houghCircles(int radius1, int radius2, int amount) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.houghCircles(mImagePaneSource.getImage(), radius1, radius2, amount);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
 	public void levelSet(int mode, int maxIterCycle1, int maxIterCycle2) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			Image image = Filters.levelSet(mImagePaneSource.getImage(), mImagePaneSource.getRect(), mode, maxIterCycle1, maxIterCycle2);
