@@ -460,7 +460,9 @@ public class MainController {
 	public void levelSet(int mode, int maxIterCycle1, int maxIterCycle2) {
 		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
 			LevelSetState state = Filters.levelSetStateFromRect(mImagePaneSource.getImage(), mImagePaneSource.getRect());
+			long time = System.currentTimeMillis();
 			Image image = Filters.levelSet(mImagePaneSource.getImage(), state, mode, maxIterCycle1, maxIterCycle2);
+			Log.d("time " + (System.currentTimeMillis() - time) + "ms");
 			mImagePaneDest.setImageWithHistory(image);
 		}
 	}
@@ -469,16 +471,21 @@ public class MainController {
 		if (mImagePaneDest != null && mImagePaneSource != null) {
 			ArrayList<Image> imageList = new ArrayList<Image>(mImagePaneSource.getHistory());
 			LevelSetState state = null;
+			long sum = 0;
 			for (Image image : imageList) {
 				if (image != null) {
 					if (state == null) {
 						state = Filters.levelSetStateFromRect(image, mImagePaneSource.getRect());
 					}
+					long time = System.currentTimeMillis();
 					Image newImage = Filters.levelSet(image, state, mode, maxIterCycle1, maxIterCycle2);
+					sum += System.currentTimeMillis() - time;
+					Log.d("time " + (System.currentTimeMillis() - time) + "ms");
 					mImagePaneDest.setImageWithHistory(newImage);
 					mImagePaneDest.paintImmediately(mImagePaneDest.getBounds());
 				}
 			}
+			Log.d("average time " + (double) sum / imageList.size() + "ms");
 		}
 	}
 }

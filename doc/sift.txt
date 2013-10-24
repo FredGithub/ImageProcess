@@ -1,0 +1,10 @@
+TP4 14 de noviembre
+
+noct = 3
+
+detection de keypoint
+pour un DoG, pour chaque pixel :
+on considere les 8 pixels voisins + les 9 du DoG du dessous + les 9 du DoG du dessus
+si le pixel a la valeur de gris min ou max, c'est un keypoint
+
+http://fiji.sc/wiki/index.php/Feature_Extraction
