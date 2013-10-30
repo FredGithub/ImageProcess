@@ -50,7 +50,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mLinearCompression;
 	private JButton mCompression;
 
-	// histogram menu
+	// color process menu
 	private JButton mFilterNegative;
 	private JButton mFilterThreshold;
 	private JButton mGlobalThreshold;
@@ -60,6 +60,7 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mBlackAndWhiteBtn;
 	private JButton mContrastBtn;
 	private JButton mEqualizeBtn;
+	private JButton mRedify;
 
 	// noise and mask menu
 	private JButton mApplyAddGaussian;
@@ -91,6 +92,9 @@ public class MenuPane extends JPanel implements ActionListener {
 	private JButton mHoughCircles;
 	private JButton mLevelSet;
 	private JButton mLevelSetSequence;
+
+	// features menu
+	private JButton mHarris;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -185,7 +189,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		mCompression.addActionListener(this);
 		menuShape.add(mCompression);
 
-		// histogram menu
+		// color process menu
 
 		JPanel menuHistogram = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		tabbedPane.addTab("Color process", menuHistogram);
@@ -225,6 +229,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mEqualizeBtn = new JButton("Equalize");
 		mEqualizeBtn.addActionListener(this);
 		menuHistogram.add(mEqualizeBtn);
+		
+		mRedify = new JButton("Red");
+		mRedify.addActionListener(this);
+		menuHistogram.add(mRedify);
 
 		// noise and mask menu
 
@@ -341,6 +349,15 @@ public class MenuPane extends JPanel implements ActionListener {
 		mLevelSetSequence.addActionListener(this);
 		menuBorders2.add(mLevelSetSequence);
 
+		// features menu
+
+		JPanel menuFeatures = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		tabbedPane.addTab("Features", menuFeatures);
+
+		mHarris = new JButton("Harris");
+		mHarris.addActionListener(this);
+		menuFeatures.add(mHarris);
+
 		// test menu
 
 		JPanel menuTest = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -424,6 +441,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			}
 		} else if (e.getSource() == mEqualizeBtn) {
 			mController.filterEqualize();
+		} else if (e.getSource() == mRedify) {
+			mController.redify();
 		} else if (e.getSource() == mApplyAddGaussian) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "spread", "5"));
@@ -596,6 +615,13 @@ public class MenuPane extends JPanel implements ActionListener {
 			params.addParam(new Param(Param.TYPE_INTEGER, "maxIterCycle2", "4"));
 			if (params.ask()) {
 				mController.levelSetSequence(params.getInteger("mode"), params.getInteger("maxIterCycle1"), params.getInteger("maxIterCycle2"));
+			}
+		} else if (e.getSource() == mHarris) {
+			ParamAsker params = new ParamAsker();
+			params.addParam(new Param(Param.TYPE_DOUBLE, "k", "0.04"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "100"));
+			if (params.ask()) {
+				mController.harris(params.getDouble("k"), params.getInteger("threshold"));
 			}
 		}
 	}

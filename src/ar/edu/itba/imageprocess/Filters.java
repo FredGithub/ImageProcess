@@ -1642,4 +1642,93 @@ public class Filters {
 
 		return gradient;
 	}
+
+	public static Image harris(Image image, double k, int threshold) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] r = new int[width][height];
+
+		// get the gradients X and Y
+		double[][] maskX = { { -1 }, { 0 }, { 1 } };
+		double[][] maskY = { { -1, 0, 1 } };
+		int[][] gx = grayGradient(image, maskX);
+		int[][] gy = grayGradient(image, maskY);
+		int[][] gx2 = multiplyArrays(gx, gx);
+		int[][] gy2 = multiplyArrays(gy, gy);
+		int[][] gxgy = multiplyArrays(gx, gy);
+
+		// get gaussian mask size
+		double sigma = 3;
+		int maskWidth = maskSize(sigma);
+		int maskHeight = maskWidth;
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+
+		// get the gaussian mask
+		double[][] gaussianMask = new double[maskWidth][maskHeight];
+		double coef = 1 / (4 * Math.PI * sigma);
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				double dist = (x - offsetX) * (x - offsetX) + (y - offsetY) * (y - offsetY);
+				double exp = Math.exp((-1 * dist) / 4 * sigma);
+				double val = coef * exp;
+				gaussianMask[x][y] = val;
+			}
+		}
+
+		// run the algorithm on each pixel
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				// get the M matrix elements
+				double a = applyFactorMaskPixel(gaussianMask, gx2, x, y);
+				double b = applyFactorMaskPixel(gaussianMask, gy2, x, y);
+				double c = applyFactorMaskPixel(gaussianMask, gxgy, x, y);
+
+				// calculate the R for this pixel and apply threshold
+				double det = a * b - c * c;
+				double trace = a + b;
+				int val = (int) (det - k * trace * trace);
+				r[x][y] = val < threshold ? 0 : val;
+			}
+		}
+
+		return new Image(r);
+	}
+
+	private static double applyFactorMaskPixel(double[][] mask, int[][] source, int pixelX, int pixelY) {
+		int maskWidth = mask.length;
+		int maskHeight = mask[0].length;
+		int offsetX = (int) (Math.ceil(maskWidth / 2.0) - 1);
+		int offsetY = (int) (Math.ceil(maskHeight / 2.0) - 1);
+		double sum = 0;
+
+		for (int x = 0; x < maskWidth; x++) {
+			for (int y = 0; y < maskHeight; y++) {
+				int val = getValueInBounds(source, pixelX - offsetX + x, pixelY - offsetY + y);
+				sum += mask[x][y] * val;
+			}
+		}
+
+		return sum;
+	}
+
+	private static int[][] multiplyArrays(int[][] array1, int[][] array2) {
+		int width = array1.length;
+		int height = array1[0].length;
+		int[][] result = new int[width][height];
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				result[x][y] = array1[x][y] * array2[x][y];
+			}
+		}
+
+		return result;
+	}
+
+	public static Image redify(Image image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		return new Image(image.getGrayChannel(), new int[width][height], new int[width][height]);
+	}
 }

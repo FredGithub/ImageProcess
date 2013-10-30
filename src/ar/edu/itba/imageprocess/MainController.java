@@ -488,4 +488,18 @@ public class MainController {
 			Log.d("average time " + (double) sum / imageList.size() + "ms");
 		}
 	}
+
+	public void harris(double k, int threshold) {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.harris(mImagePaneSource.getImage(), k, threshold);
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
+
+	public void redify() {
+		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
+			Image image = Filters.redify(mImagePaneSource.getImage());
+			mImagePaneDest.setImageWithHistory(image);
+		}
+	}
 }
