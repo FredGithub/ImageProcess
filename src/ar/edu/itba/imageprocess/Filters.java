@@ -14,7 +14,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Vector;
 
+import mpi.cbg.fly.Feature;
+import mpi.cbg.fly.SIFT;
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ChartUtils;
 import ar.edu.itba.imageprocess.utils.Log;
@@ -1731,5 +1734,14 @@ public class Filters {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		return new Image(image.getGrayChannel(), new int[width][height], new int[width][height]);
+	}
+
+	public static Image sift(Image image) {
+		int width = image.getWidth();
+		int height = image.getHeight();
+		int[][] grayChannel = image.getGrayChannel();
+		Vector<Feature> features = SIFT.getFeatures(width, height, ArrayUtils.intArray2Dto1D(grayChannel));
+		Log.d("features=" + features.size());
+		return null;
 	}
 }

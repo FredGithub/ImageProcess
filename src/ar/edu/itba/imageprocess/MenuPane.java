@@ -95,6 +95,7 @@ public class MenuPane extends JPanel implements ActionListener {
 
 	// features menu
 	private JButton mHarris;
+	private JButton mSift;
 
 	// test menu
 	private JButton mGaussianTest;
@@ -357,6 +358,10 @@ public class MenuPane extends JPanel implements ActionListener {
 		mHarris = new JButton("Harris");
 		mHarris.addActionListener(this);
 		menuFeatures.add(mHarris);
+
+		mSift = new JButton("SIFT");
+		mSift.addActionListener(this);
+		menuFeatures.add(mSift);
 
 		// test menu
 
@@ -623,6 +628,8 @@ public class MenuPane extends JPanel implements ActionListener {
 			if (params.ask()) {
 				mController.harris(params.getDouble("k"), params.getInteger("threshold"));
 			}
+		} else if (e.getSource() == mSift) {
+			mController.sift();
 		}
 	}
 
