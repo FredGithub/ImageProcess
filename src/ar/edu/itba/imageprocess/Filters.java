@@ -1684,15 +1684,16 @@ public class Filters {
 				double b = applyFactorMaskPixel(gaussianMask, gy2, x, y);
 				double c = applyFactorMaskPixel(gaussianMask, gxgy, x, y);
 
-				// calculate the R for this pixel and apply threshold
+				// calculate the R for this pixel
 				double det = a * b - c * c;
 				double trace = a + b;
 				int val = (int) (det - k * trace * trace);
-				r[x][y] = val < threshold ? 0 : val;
+				//r[x][y] = val < threshold ? 0 : val;
+				r[x][y] = val;
 			}
 		}
 
-		return new Image(r);
+		return filterThreshold(compress(new Image(r)), threshold);
 	}
 
 	private static double applyFactorMaskPixel(double[][] mask, int[][] source, int pixelX, int pixelY) {

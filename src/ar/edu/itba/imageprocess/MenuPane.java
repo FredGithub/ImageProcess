@@ -229,7 +229,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		mEqualizeBtn = new JButton("Equalize");
 		mEqualizeBtn.addActionListener(this);
 		menuHistogram.add(mEqualizeBtn);
-		
+
 		mRedify = new JButton("Red");
 		mRedify.addActionListener(this);
 		menuHistogram.add(mRedify);
@@ -619,7 +619,7 @@ public class MenuPane extends JPanel implements ActionListener {
 		} else if (e.getSource() == mHarris) {
 			ParamAsker params = new ParamAsker();
 			params.addParam(new Param(Param.TYPE_DOUBLE, "k", "0.04"));
-			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "100"));
+			params.addParam(new Param(Param.TYPE_INTEGER, "threshold", "185"));
 			if (params.ask()) {
 				mController.harris(params.getDouble("k"), params.getInteger("threshold"));
 			}
