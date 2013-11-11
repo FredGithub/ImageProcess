@@ -22,6 +22,16 @@ public class ArrayUtils {
 		return dest;
 	}
 
+	public static int[] intArray2Dto1DBis(int[][] source) {
+		int[] dest = new int[source.length * source[0].length];
+		for (int j = 0; j < source[0].length; j++) {
+			for (int i = 0; i < source.length; i++) {
+				dest[j * source.length + i] = source[i][j];
+			}
+		}
+		return dest;
+	}
+
 	public static int max(int[] source) {
 		int max = source[0];
 		for (int i = 0; i < source.length; i++) {
@@ -75,5 +85,13 @@ public class ArrayUtils {
 			median = (double) source[source.length / 2];
 		}
 		return median;
+	}
+
+	public static int[] mult(int[] source, int factor) {
+		int[] dest = new int[source.length];
+		for (int i = 0; i < source.length; i++) {
+			dest[i] = source[i] * factor;
+		}
+		return dest;
 	}
 }

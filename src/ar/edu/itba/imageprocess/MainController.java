@@ -504,9 +504,9 @@ public class MainController {
 	}
 
 	public void sift() {
-		if (mImagePaneDest != null && mImagePaneSource != null && mImagePaneSource.getImage() != null) {
-			Image image = Filters.sift(mImagePaneSource.getImage());
-			mImagePaneDest.setImageWithHistory(image);
+		ImagePane[] imagePanes = mMainFrame.getImagePanes();
+		if (mImagePaneDest != null && imagePanes[0].getImage() != null && imagePanes[1].getImage() != null) {
+			Filters.compareSift(imagePanes[0].getImage(), imagePanes[1].getImage());
 		}
 	}
 }

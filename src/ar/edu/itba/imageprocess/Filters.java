@@ -14,9 +14,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
 import mpi.cbg.fly.Feature;
+import mpi.cbg.fly.PointMatch;
 import mpi.cbg.fly.SIFT;
 import ar.edu.itba.imageprocess.utils.ArrayUtils;
 import ar.edu.itba.imageprocess.utils.ChartUtils;
@@ -1736,12 +1738,47 @@ public class Filters {
 		return new Image(image.getGrayChannel(), new int[width][height], new int[width][height]);
 	}
 
-	public static Image sift(Image image) {
+	public static Vector<Feature> getImageSift(Image image) {
 		int width = image.getWidth();
 		int height = image.getHeight();
 		int[][] grayChannel = image.getGrayChannel();
-		Vector<Feature> features = SIFT.getFeatures(width, height, ArrayUtils.intArray2Dto1D(grayChannel));
-		Log.d("features=" + features.size());
-		return null;
+		int[] pixels = ArrayUtils.mult(ArrayUtils.intArray2Dto1DBis(grayChannel), 256 * 256 + 256 + 1);
+		Vector<Feature> features = SIFT.getFeatures(width, height, pixels);
+		return features;
+	}
+
+	public static void compareSift(Image image1, Image image2) {
+		Log.d("processing image 1...");
+		Vector<Feature> features1 = getImageSift(image1);
+		Log.d("processing image 2...");
+		Vector<Feature> features2 = getImageSift(image2);
+		Vector<PointMatch> matches = createMatches(features1, features2, 0.96f);
+		int size = Math.max(features1.size(), features2.size());
+		Log.d("matches found: " + matches.size() + "/" + size + " (" + (100.0 * matches.size() / size) + "%)");
+	}
+
+	public static Vector<PointMatch> createMatches(List<Feature> fs1, List<Feature> fs2, float max_id) {
+		Vector<PointMatch> matches = new Vector<PointMatch>();
+		float sum = 0;
+		for (Feature f1 : fs1) {
+			Feature best = null;
+			float best_d = Float.MAX_VALUE;
+			float second_best_d = Float.MAX_VALUE;
+			for (Feature f2 : fs2) {
+				float d = f1.descriptorDistance(f2);
+				if (d < best_d) {
+					second_best_d = best_d;
+					best_d = d;
+					best = f2;
+				} else if (d < second_best_d)
+					second_best_d = d;
+			}
+			sum += best_d / second_best_d;
+			if (best != null && second_best_d < Float.MAX_VALUE && best_d / second_best_d < max_id)
+				matches.addElement(new PointMatch(new mpi.cbg.fly.Point(new float[] { f1.location[0], f1.location[1] }), new mpi.cbg.fly.Point(new float[] { best.location[0], best.location[1] }),
+						(f1.scale + best.scale) / 2.0f));
+		}
+		Log.d("tot=" + (sum / fs1.size()));
+		return matches;
 	}
 }
