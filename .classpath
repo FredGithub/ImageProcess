@@ -5,11 +5,6 @@
 	<classpathentry kind="lib" path="libs/jfreechart-1.0.15.jar"/>
 	<classpathentry kind="lib" path="libs/jcommon-1.0.18.jar"/>
 	<classpathentry kind="lib" path="libs/javasift.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/opencv/build/java/opencv-247.jar">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Program Files/opencv/build/java/x86"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="libs/ffmpeg-20130915-git-7ac6c63-windows-x86.jar"/>
 	<classpathentry kind="lib" path="libs/javacpp.jar"/>
 	<classpathentry kind="lib" path="libs/javacv-windows-x86.jar"/>
