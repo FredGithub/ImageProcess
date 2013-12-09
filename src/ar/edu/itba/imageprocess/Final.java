@@ -11,23 +11,62 @@ import static com.googlecode.javacv.cpp.opencv_highgui.*;
 
 public class Final {
 
+	private static final long MEGABYTE = 1024L * 1024L;
+	private static final String METHOD_CLASSIC = "classic";
+	private static final String METHOD_PROBA = "probabilistic";
+	private static final String METHOD_SCALE = "multiscale";
+	private static final String FILENAME = "res/img/hough/building2.jpg";
+
 	public static void main(String[] args) {
-		try {
-			hough(args);
-		} catch (Exception e) {
-		}
+		show();
 	}
 
-	public static void hough(String[] args) {
-		String fileName = args.length >= 1 ? args[0] : "res/img/dist02.jpg"; // if no params provided, compute the defaut image
-		IplImage src = cvLoadImage(fileName, 0);
+	public static void show() {
+		hough(METHOD_CLASSIC, true);
+	}
+
+	public static void performance() {
+		Runtime runtime = Runtime.getRuntime();
+		int loops = 25;
+		long memorySum = 0;
+		long startTime = System.currentTimeMillis();
+
+		for (int i = 0; i < loops; i++) {
+			runtime.gc();
+			hough(METHOD_CLASSIC, false);
+			long memory = runtime.totalMemory() - runtime.freeMemory();
+			memorySum += memory;
+			double percentage = 100.0 * (i + 1) / loops;
+			System.out.println("progress " + (Math.round(percentage * 10) / 10.0) + "%");
+		}
+		System.out.println("Average used memory (classic): " + (float) memorySum / loops);
+		System.out.println("Elapsed time (classic): " + (System.currentTimeMillis() - startTime) + " ms");
+
+		memorySum = 0;
+		startTime = System.currentTimeMillis();
+		for (int i = 0; i < loops; i++) {
+			runtime.gc();
+			hough(METHOD_PROBA, false);
+			long memory = runtime.totalMemory() - runtime.freeMemory();
+			memorySum += memory;
+			double percentage = 100.0 * (i + 1) / loops;
+			System.out.println("progress " + (Math.round(percentage * 10) / 10.0) + "%");
+		}
+		System.out.println("Average used memory (randomized): " + (float) memorySum / loops);
+		System.out.println("Elapsed time (randomized): " + (System.currentTimeMillis() - startTime) + " ms");
+	}
+
+	public static long bytesToMegabytes(long bytes) {
+		return bytes / MEGABYTE;
+	}
+
+	public static void hough(String method, boolean output) {
+		IplImage src = cvLoadImage(FILENAME, 0);
 		IplImage dst;
 		IplImage colorDst;
 		CvMemStorage storage = cvCreateMemStorage(0);
 		CvSeq lines = new CvSeq();
 
-		CanvasFrame source = new CanvasFrame("Source");
-		CanvasFrame hough = new CanvasFrame("Hough");
 		if (src == null) {
 			System.out.println("Couldn't load source image.");
 			return;
@@ -38,30 +77,28 @@ public class Final {
 
 		cvCanny(src, dst, 50, 200, 3);
 		cvCvtColor(dst, colorDst, CV_GRAY2BGR);
-		String method = "probabilistic";
-		int max = 5;
-		
+		int max = 40;
+
 		/*
 		 * apply the probabilistic hough transform
 		 * which returns for each line deteced two points ((x1, y1); (x2,y2))
 		 * defining the detected segment
 		 */
-		if (method.equals("probabilistic")) {
-			System.out.println("Using the Probabilistic Hough Transform");
-			lines = cvHoughLines2(dst, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 40, 50, 10);
-			for (int i = 0; i < Math.min(max, lines.total()); i++) {
-				// Based on JavaCPP, the equivalent of the C code:
-				// CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
-				// CvPoint first=line[0], second=line[1]
-				// is:
-				Pointer line = cvGetSeqElem(lines, i);
-				CvPoint pt1 = new CvPoint(line).position(0);
-				CvPoint pt2 = new CvPoint(line).position(1);
-
-				System.out.println("Line spotted: ");
-				System.out.println("\t pt1: " + pt1);
-				System.out.println("\t pt2: " + pt2);
-				cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0); // draw the segment on the image
+		if (method.equals(METHOD_PROBA)) {
+			if (output) {
+				System.out.println("Using the Probabilistic Hough Transform");
+			}
+			lines = cvHoughLines2(dst, storage, CV_HOUGH_PROBABILISTIC, 1, Math.PI / 180, 80, 30, 10);
+			if (output) {
+				for (int i = 0; i < Math.min(max, lines.total()); i++) {
+					Pointer line = cvGetSeqElem(lines, i);
+					CvPoint pt1 = new CvPoint(line).position(0);
+					CvPoint pt2 = new CvPoint(line).position(1);
+					System.out.println("Line spotted: ");
+					System.out.println("\t pt1: " + pt1);
+					System.out.println("\t pt2: " + pt2);
+					cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 2, CV_AA, 0);
+				}
 			}
 		}
 		/*
@@ -69,52 +106,60 @@ public class Final {
 		 * rho: distance from the origin of the image to the line
 		 * theta: angle between the x-axis and the normal line of the detected line
 		 */
-		else if (method.equals("multiscale")) {
-			System.out.println("Using the multiscale Hough Transform"); //
+		else if (method.equals(METHOD_SCALE)) {
+			if (output) {
+				System.out.println("Using the multiscale Hough Transform");
+			}
 			lines = cvHoughLines2(dst, storage, CV_HOUGH_MULTI_SCALE, 1, Math.PI / 180, 40, 1, 1);
-			for (int i = 0; i < Math.min(max, lines.total()); i++) {
-				CvPoint2D32f point = new CvPoint2D32f(cvGetSeqElem(lines, i));
-
-				float rho = point.x();
-				float theta = point.y();
-
-				double a = Math.cos((double) theta), b = Math.sin((double) theta);
-				double x0 = a * rho, y0 = b * rho;
-				CvPoint pt1 = new CvPoint((int) Math.round(x0 + 1000 * (-b)), (int) Math.round(y0 + 1000 * (a))), pt2 = new CvPoint((int) Math.round(x0 - 1000 * (-b)), (int) Math.round(y0 - 1000
-						* (a)));
-				System.out.println("Line spoted: ");
-				System.out.println("\t rho= " + rho);
-				System.out.println("\t theta= " + theta);
-				cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0);
+			if (output) {
+				for (int i = 0; i < Math.min(max, lines.total()); i++) {
+					CvPoint2D32f point = new CvPoint2D32f(cvGetSeqElem(lines, i));
+					float rho = point.x();
+					float theta = point.y();
+					double a = Math.cos((double) theta), b = Math.sin((double) theta);
+					double x0 = a * rho, y0 = b * rho;
+					CvPoint pt1 = new CvPoint((int) Math.round(x0 + 1000 * (-b)), (int) Math.round(y0 + 1000 * (a)));
+					CvPoint pt2 = new CvPoint((int) Math.round(x0 - 1000 * (-b)), (int) Math.round(y0 - 1000 * (a)));
+					System.out.println("Line spoted: ");
+					System.out.println("\t rho= " + rho);
+					System.out.println("\t theta= " + theta);
+					cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0);
+				}
 			}
 		}
 		/*
 		 * Default: apply the standard hough transform. Outputs: same as the multiscale output.
 		 */
 		else {
-			System.out.println("Using the Standard Hough Transform");
-			lines = cvHoughLines2(dst, storage, CV_HOUGH_STANDARD, 1, Math.PI / 180, 90, 0, 0);
-			for (int i = 0; i < Math.min(max, lines.total()); i++) {
-				CvPoint2D32f point = new CvPoint2D32f(cvGetSeqElem(lines, i));
-
-				float rho = point.x();
-				float theta = point.y();
-
-				double a = Math.cos((double) theta), b = Math.sin((double) theta);
-				double x0 = a * rho, y0 = b * rho;
-				CvPoint pt1 = new CvPoint((int) Math.round(x0 + 1000 * (-b)), (int) Math.round(y0 + 1000 * (a)));
-				CvPoint pt2 = new CvPoint((int) Math.round(x0 - 1000 * (-b)), (int) Math.round(y0 - 1000 * (a)));
-				System.out.println("Line spotted: ");
-				System.out.println("\t rho= " + rho);
-				System.out.println("\t theta= " + theta);
-				cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 3, CV_AA, 0);
+			if (output) {
+				System.out.println("Using the Standard Hough Transform");
+			}
+			lines = cvHoughLines2(dst, storage, CV_HOUGH_STANDARD, 0.5, Math.PI / 180, 80, 0, 0);
+			if (output) {
+				for (int i = 0; i < Math.min(max, lines.total()); i++) {
+					CvPoint2D32f point = new CvPoint2D32f(cvGetSeqElem(lines, i));
+					float rho = point.x();
+					float theta = point.y();
+					double a = Math.cos((double) theta), b = Math.sin((double) theta);
+					double x0 = a * rho, y0 = b * rho;
+					CvPoint pt1 = new CvPoint((int) Math.round(x0 + 1000 * (-b)), (int) Math.round(y0 + 1000 * (a)));
+					CvPoint pt2 = new CvPoint((int) Math.round(x0 - 1000 * (-b)), (int) Math.round(y0 - 1000 * (a)));
+					System.out.println("Line spotted: ");
+					System.out.println("\t rho= " + rho);
+					System.out.println("\t theta= " + theta);
+					cvLine(colorDst, pt1, pt2, CV_RGB(255, 0, 0), 2, CV_AA, 0);
+				}
 			}
 		}
-		source.showImage(src);
-		hough.showImage(colorDst);
 
-		source.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		hough.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		if (output) {
+			CanvasFrame source = new CanvasFrame("Source");
+			CanvasFrame hough = new CanvasFrame("Hough");
+			source.showImage(src);
+			hough.showImage(colorDst);
+			source.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			hough.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		}
 	}
 
 	public static void motion() throws Exception {
